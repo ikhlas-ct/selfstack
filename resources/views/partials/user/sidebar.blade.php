@@ -36,16 +36,15 @@
                 </a>
             </li>
 
-            {{--
-                Menu berikutnya ditambah di sini setelah route-nya dibuat, contoh:
+            <!-- Kosakata (aktif juga di halaman create, edit, show, dan import) -->
+            <li class="nav-item {{ request()->routeIs('admin.kosakata*') ? 'active' : '' }}">
+                <a href="{{ route('admin.kosakata.index') }}">
+                    <i class="fas fa-language"></i>
+                    <p>Kosakata</p>
+                </a>
+            </li>
 
-                <li class="nav-item {{ request()->routeIs('admin.kosakata*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kosakata.index') }}">
-                        <i class="fas fa-language"></i>
-                        <p>Kosakata</p>
-                    </a>
-                </li>
-            --}}
+            {{-- Menu berikutnya ditambah di sini setelah route-nya dibuat. --}}
 
             <!-- Logout -->
             <li class="nav-item mt-4">

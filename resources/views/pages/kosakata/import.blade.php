@@ -35,6 +35,10 @@
     .mode-option + .mode-option { margin-top: 8px; }
     .mode-option .form-check-label { font-size: .85rem; font-weight: 600; color: #1e293b; }
     .mode-option small { display: block; color: #64748b; font-size: .78rem; margin-top: 2px; }
+    /* Radio di kiri, teks membungkus di kanan (tidak keluar dari kartu) */
+    .form-check.mode-option { display: flex; align-items: flex-start; gap: 12px; padding-left: 14px !important; }
+    .form-check.mode-option .form-check-input { float: none; margin: 3px 0 0 0; flex-shrink: 0; }
+    .form-check.mode-option .form-check-label { display: block; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 
     /* ===== TABEL KOLOM ===== */
     .table thead th { background: #f8fafc; color: #64748b; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; padding: 10px 12px; border-bottom: 2px solid #e2e8f0; border-top: none; white-space: nowrap; }
@@ -97,15 +101,41 @@
                     <div class="card-body">
                         <div class="section-divider"><i class="fas fa-clipboard-check me-2"></i>Hasil Import</div>
 
+                        @php
+                            $kotak = [
+                                ['kosakata_baru', 'Kosakata baru', 'text-success'],
+                                ['kosakata_diperbarui', 'Kosakata diperbarui', 'text-primary'],
+                                ['kosakata_dilewati', 'Kosakata dilewati', ''],
+                                ['kategori_baru', 'Kategori baru', ''],
+                                ['contoh_baru', 'Contoh baru', 'text-success'],
+                                ['contoh_diperbarui', 'Contoh diperbarui', 'text-primary'],
+                                ['contoh_dilewati', 'Contoh dilewati', ''],
+                                ['pecahan_baru', 'Pecahan baru', 'text-success'],
+                                ['pecahan_diperbarui', 'Pecahan diperbarui', 'text-primary'],
+                                ['pecahan_dilewati', 'Pecahan dilewati', ''],
+                                ['relasi_baru', 'Relasi baru', 'text-success'],
+                                ['relasi_dilewati', 'Relasi dilewati', ''],
+                                ['grup_baru', 'Grup baru', 'text-success'],
+                                ['anggota_baru', 'Anggota grup baru', 'text-success'],
+                                ['anggota_dilewati', 'Anggota grup dilewati', ''],
+                            ];
+                        @endphp
+
                         <div class="row g-2 mb-3">
-                            <div class="col-6 col-md-3"><div class="hasil-box"><div class="hasil-angka text-success">{{ $h['kosakata_baru'] }}</div><div class="hasil-label">Kosakata baru</div></div></div>
-                            <div class="col-6 col-md-3"><div class="hasil-box"><div class="hasil-angka text-primary">{{ $h['kosakata_diperbarui'] }}</div><div class="hasil-label">Kosakata diperbarui</div></div></div>
-                            <div class="col-6 col-md-3"><div class="hasil-box"><div class="hasil-angka">{{ $h['kosakata_dilewati'] }}</div><div class="hasil-label">Kosakata dilewati</div></div></div>
-                            <div class="col-6 col-md-3"><div class="hasil-box"><div class="hasil-angka">{{ $h['kategori_baru'] }}</div><div class="hasil-label">Kategori baru</div></div></div>
-                            <div class="col-6 col-md-3"><div class="hasil-box"><div class="hasil-angka text-success">{{ $h['contoh_baru'] }}</div><div class="hasil-label">Contoh baru</div></div></div>
-                            <div class="col-6 col-md-3"><div class="hasil-box"><div class="hasil-angka text-primary">{{ $h['contoh_diperbarui'] }}</div><div class="hasil-label">Contoh diperbarui</div></div></div>
-                            <div class="col-6 col-md-3"><div class="hasil-box"><div class="hasil-angka">{{ $h['contoh_dilewati'] }}</div><div class="hasil-label">Contoh dilewati</div></div></div>
-                            <div class="col-6 col-md-3"><div class="hasil-box"><div class="hasil-angka {{ $h['gagal'] ? 'text-danger' : '' }}">{{ $h['gagal'] }}</div><div class="hasil-label">Baris gagal</div></div></div>
+                            @foreach ($kotak as [$kunci, $label, $warna])
+                                <div class="col-6 col-md-3">
+                                    <div class="hasil-box">
+                                        <div class="hasil-angka {{ $warna }}">{{ $h[$kunci] ?? 0 }}</div>
+                                        <div class="hasil-label">{{ $label }}</div>
+                                    </div>
+                                </div>
+                            @endforeach
+                            <div class="col-6 col-md-3">
+                                <div class="hasil-box">
+                                    <div class="hasil-angka {{ $h['gagal'] ? 'text-danger' : '' }}">{{ $h['gagal'] }}</div>
+                                    <div class="hasil-label">Baris gagal</div>
+                                </div>
+                            </div>
                         </div>
 
                         @if ($h['gagal'] > 0)
@@ -155,7 +185,7 @@
                                         {{ old('mode', 'perbarui') === 'perbarui' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="mode-perbarui">
                                         Perbarui dengan isi Excel
-                                        <small>Sel yang dikosongkan di Excel tidak menghapus data lama.</small>
+                                        <small>Sel yang dikosongkan di Excel tidak menghapus data lama. Relasi dan anggota grup hanya ditambah, tidak pernah diubah.</small>
                                     </label>
                                 </div>
                                 <div class="mode-option form-check ps-5">
@@ -192,7 +222,8 @@
                             </div>
 
                             <p class="text-muted" style="font-size:.83rem;">
-                                File berisi dua sheet. Nama sheet dan judul kolom (baris 1) harus persis seperti di bawah,
+                                File boleh berisi sampai lima sheet. Hanya sheet <code>Kosakata</code> yang utama, sheet lain opsional
+                                (sheet yang tidak ada di file dilewati). Nama sheet dan judul kolom (baris 1) harus persis seperti di bawah,
                                 paling mudah dengan mengisi template.
                             </p>
 
@@ -202,20 +233,18 @@
                                     <thead><tr><th>Kolom</th><th>Wajib</th><th>Keterangan</th></tr></thead>
                                     <tbody>
                                         <tr><td><code>hanzi</code></td><td>Ya</td><td>Maks. 20 karakter</td></tr>
-                                        <tr><td><code>pinyin</code></td><td>Ya</td><td>Hanzi + pinyin harus unik</td></tr>
-                                        <tr><td><code>arti_indonesia</code></td><td>Ya</td><td></td></tr>
+                                        <tr><td><code>pinyin</code></td><td>Ya</td><td>Maks. 60 karakter. Hanzi + pinyin harus unik (huruf besar/kecil dan tanda nada dibedakan)</td></tr>
+                                        <tr><td><code>zhuyin</code></td><td>-</td><td>Bopomofo, mis. ㄋㄧˇ ㄏㄠˇ</td></tr>
+                                        <tr><td><code>arti_indonesia</code></td><td>-</td><td>Boleh dikosongkan dulu dan diisi belakangan</td></tr>
+                                        <tr><td><code>arti_singkat</code></td><td>-</td><td>Teks pilihan jawaban di soal (maks. 100 karakter)</td></tr>
                                         <tr><td><code>baca_indonesia</code></td><td>-</td><td></td></tr>
                                         <tr><td><code>english</code></td><td>-</td><td></td></tr>
                                         <tr><td><code>kegunaan</code></td><td>-</td><td>Penjelasan kegunaan kata (maks. 2000 karakter)</td></tr>
+                                        <tr><td><code>kata_pengait</code></td><td>-</td><td>Pengait ingatan untuk membantu menghafal (maks. 1000 karakter)</td></tr>
+                                        <tr><td><code>jenis_kata</code></td><td>-</td><td>{{ implode(', ', $jenisKata) }}</td></tr>
+                                        <tr><td><code>sub_jenis</code></td><td>-</td><td>{{ implode(', ', $subJenis) }}</td></tr>
                                         <tr><td><code>kategori</code></td><td>-</td><td>Nama kategori; dibuat otomatis kalau belum ada</td></tr>
-                                        <tr><td><code>level_hsk</code></td><td>-</td>
-                                            <td>
-                                                Angka tingkat
-                                                @if ($levels->isNotEmpty())
-                                                    ({{ $levels->pluck('tingkat')->implode(', ') }})
-                                                @endif
-                                            </td>
-                                        </tr>
+                                        <tr><td><code>level_tocfl</code></td><td>-</td><td>Angka tingkat @if ($levels->isNotEmpty())({{ $levels->pluck('tingkat')->implode(', ') }})@endif</td></tr>
                                         <tr><td><code>urutan</code></td><td>-</td><td>Kosong = otomatis di akhir</td></tr>
                                     </tbody>
                                 </table>
@@ -226,8 +255,8 @@
                                 <table class="table mb-0">
                                     <thead><tr><th>Kolom</th><th>Wajib</th><th>Keterangan</th></tr></thead>
                                     <tbody>
-                                        <tr><td><code>kosakata_hanzi</code></td><td>Ya</td><td rowspan="2">Harus sama persis dengan kosakatanya</td></tr>
-                                        <tr><td><code>kosakata_pinyin</code></td><td>Ya</td></tr>
+                                        <tr><td><code>kosakata_hanzi</code></td><td>Ya</td><td>Harus sama persis dengan kosakatanya</td></tr>
+                                        <tr><td><code>kosakata_pinyin</code></td><td>Ya</td><td></td></tr>
                                         <tr><td><code>kalimat_hanzi</code></td><td>Ya</td><td></td></tr>
                                         <tr><td><code>kalimat_pinyin</code></td><td>Ya</td><td></td></tr>
                                         <tr><td><code>kalimat_arti</code></td><td>Ya</td><td></td></tr>
@@ -236,8 +265,53 @@
                                 </table>
                             </div>
 
+                            <div class="fw-semibold mb-1" style="font-size:.85rem;">Sheet <code>Pecahan Karakter</code> - satu baris satu karakter di dalam kata</div>
+                            <div class="table-responsive mb-3">
+                                <table class="table mb-0">
+                                    <thead><tr><th>Kolom</th><th>Wajib</th><th>Keterangan</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><code>kosakata_hanzi</code></td><td>Ya</td><td>Harus sama persis dengan kosakatanya</td></tr>
+                                        <tr><td><code>kosakata_pinyin</code></td><td>Ya</td><td></td></tr>
+                                        <tr><td><code>urutan</code></td><td>Ya</td><td>Posisi karakter di dalam kata, mulai dari 1 (kiri ke kanan)</td></tr>
+                                        <tr><td><code>karakter_hanzi</code></td><td>Ya</td><td>Karakter harus sudah ada di data karakter</td></tr>
+                                        <tr><td><code>karakter_pinyin</code></td><td>Ya</td><td>Sama persis dengan pinyin karakter di data karakter</td></tr>
+                                        <tr><td><code>pinyin_di_kata</code></td><td>-</td><td>Isi kalau bacaan di kata ini berbeda dari kamus</td></tr>
+                                        <tr><td><code>arti_di_kata</code></td><td>-</td><td>Isi kalau arti di kata ini berbeda dari kamus</td></tr>
+                                        <tr><td><code>penjelasan</code></td><td>-</td><td></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="fw-semibold mb-1" style="font-size:.85rem;">Sheet <code>Relasi</code> - satu baris satu pasang kata</div>
+                            <div class="table-responsive mb-3">
+                                <table class="table mb-0">
+                                    <thead><tr><th>Kolom</th><th>Wajib</th><th>Keterangan</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><code>kosakata_hanzi</code></td><td>Ya</td><td>Kedua kata harus sudah ada (di sistem atau di sheet Kosakata)</td></tr>
+                                        <tr><td><code>kosakata_pinyin</code></td><td>Ya</td><td></td></tr>
+                                        <tr><td><code>terkait_hanzi</code></td><td>Ya</td><td></td></tr>
+                                        <tr><td><code>terkait_pinyin</code></td><td>Ya</td><td></td></tr>
+                                        <tr><td><code>jenis</code></td><td>Ya</td><td>{{ implode(', ', $jenisRelasi) }}. Relasi dibaca dua arah, jadi cukup dicatat sekali</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="fw-semibold mb-1" style="font-size:.85rem;">Sheet <code>Grup Kosakata</code> - satu baris satu anggota grup</div>
+                            <div class="table-responsive mb-3">
+                                <table class="table mb-0">
+                                    <thead><tr><th>Kolom</th><th>Wajib</th><th>Keterangan</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><code>grup_nama</code></td><td>Ya</td><td>Grup dibuat otomatis kalau namanya belum ada</td></tr>
+                                        <tr><td><code>grup_keterangan</code></td><td>-</td><td>Dipakai hanya saat grup baru dibuat</td></tr>
+                                        <tr><td><code>kosakata_hanzi</code></td><td>Ya</td><td></td></tr>
+                                        <tr><td><code>kosakata_pinyin</code></td><td>Ya</td><td></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
                             <p class="text-muted mb-0" style="font-size:.8rem;">
                                 Satu kosakata boleh punya banyak baris contoh kalimat. Hapus baris contoh dari template sebelum mengisi data sendiri.
+                                Urutan sheet di file tidak berpengaruh: kosakata selalu diproses lebih dulu.
                             </p>
                         </div>
                     </div>

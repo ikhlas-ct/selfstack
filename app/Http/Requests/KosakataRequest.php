@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Kosakata;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -43,19 +44,29 @@ class KosakataRequest extends FormRequest
 
         return [
             'kategori_id'    => ['nullable', 'integer', 'exists:kategoris,id'],
-            'level_hsk_id'   => ['nullable', 'integer', 'exists:level_hsks,id'],
+            'level_tocfl_id' => ['nullable', 'integer', 'exists:level_tocfls,id'],
+
             'hanzi'          => [
                 'required', 'string', 'max:20',
-                // Di database yang unik adalah gabungan hanzi + pinyin.
+                // Di database yang unik adalah gabungan hanzi + pinyin (kosakatas_hanzi_pinyin_unique).
                 Rule::unique('kosakatas', 'hanzi')
                     ->where(fn ($q) => $q->where('pinyin', $this->input('pinyin')))
                     ->ignore($id),
             ],
             'pinyin'         => ['required', 'string', 'max:60'],
+            'zhuyin'         => ['nullable', 'string', 'max:100'],
             'baca_indonesia' => ['nullable', 'string', 'max:60'],
+
+            // arti_indonesia di database boleh NULL (mis. data awal dari daftar TOCFL yang baru berbahasa Inggris).
+            'arti_indonesia' => ['nullable', 'string', 'max:150'],
+            'arti_singkat'   => ['nullable', 'string', 'max:100'],
             'english'        => ['nullable', 'string', 'max:150'],
-            'arti_indonesia' => ['required', 'string', 'max:150'],
+
+            'jenis_kata'     => ['nullable', 'string', Rule::in(Kosakata::JENIS_KATA)],
+            'sub_jenis'      => ['nullable', 'string', Rule::in(Kosakata::SUB_JENIS)],
+
             'kegunaan'       => ['nullable', 'string', 'max:2000'],
+            'kata_pengait'   => ['nullable', 'string', 'max:1000'],
             'urutan'         => ['nullable', 'integer', 'min:0'],
 
             'contoh_kalimat'                       => ['nullable', 'array', 'max:20'],
@@ -76,6 +87,7 @@ class KosakataRequest extends FormRequest
             'integer'      => ':attribute harus berupa angka bulat.',
             'min.numeric'  => ':attribute tidak boleh negatif.',
             'exists'       => ':attribute yang dipilih tidak valid.',
+            'in'           => ':attribute yang dipilih tidak valid.',
             'hanzi.unique' => 'Kombinasi hanzi dan pinyin ini sudah ada di daftar kosakata.',
         ];
     }
@@ -84,13 +96,18 @@ class KosakataRequest extends FormRequest
     {
         return [
             'kategori_id'    => 'Kategori',
-            'level_hsk_id'   => 'Level HSK',
+            'level_tocfl_id' => 'Level TOCFL',
             'hanzi'          => 'Hanzi',
             'pinyin'         => 'Pinyin',
+            'zhuyin'         => 'Zhuyin',
             'baca_indonesia' => 'Cara baca Indonesia',
-            'english'        => 'Arti Inggris',
             'arti_indonesia' => 'Arti Indonesia',
+            'arti_singkat'   => 'Arti singkat',
+            'english'        => 'Arti Inggris',
+            'jenis_kata'     => 'Jenis kata',
+            'sub_jenis'      => 'Sub jenis',
             'kegunaan'       => 'Kegunaan kata',
+            'kata_pengait'   => 'Kata pengait',
             'urutan'         => 'Urutan',
 
             'contoh_kalimat'                       => 'Contoh kalimat',

@@ -45,6 +45,7 @@
     .hanzi-text { font-size: 1.15rem; font-weight: 600; color: #1e293b; font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', 'Plus Jakarta Sans', sans-serif; }
 
     .badge { font-size: .7rem; font-weight: 600; padding: 4px 9px; border-radius: 6px; letter-spacing: .2px; }
+    .badge-level    { background: #e8f0fe; color: #1a73e8; }
     .badge-aktif { background: #dcfce7; color: #15803d; }
     .badge-info-soft { background: #e8f0fe; color: #1a73e8; }
     .badge-nonaktif { background: #f1f5f9; color: #64748b; }
@@ -147,36 +148,62 @@
                                 <div class="info-value">{{ $kosakata->pinyin }}</div>
                             </div>
                             <div class="info-item">
+                                <div class="info-label">Zhuyin</div>
+                                <div class="info-value">{{ $kosakata->zhuyin ?: '-' }}</div>
+                            </div>
+                            <div class="info-item">
                                 <div class="info-label">Cara Baca Indonesia</div>
                                 <div class="info-value">{{ $kosakata->baca_indonesia ?: '-' }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Arti Indonesia</div>
-                                <div class="info-value">{{ $kosakata->arti_indonesia }}</div>
+                                <div class="info-value">{{ $kosakata->arti_indonesia ?: '-' }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Arti Inggris</div>
                                 <div class="info-value">{{ $kosakata->english ?: '-' }}</div>
                             </div>
                             <div class="info-item">
+                                <div class="info-label">Arti Singkat (pilihan soal)</div>
+                                <div class="info-value">{{ $kosakata->arti_singkat ?: '-' }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Jenis Kata</div>
+                                <div class="info-value">
+                                    {{ $kosakata->jenis_kata ? \Illuminate\Support\Str::headline($kosakata->jenis_kata) : '-' }}
+                                    @if ($kosakata->sub_jenis)
+                                        <span class="text-muted fw-normal">({{ \Illuminate\Support\Str::headline($kosakata->sub_jenis) }})</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="info-item">
                                 <div class="info-label">Kegunaan</div>
                                 <div class="info-value" style="white-space:pre-line;">{{ $kosakata->kegunaan ?: '-' }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Kata Pengait</div>
+                                <div class="info-value">{{ $kosakata->kata_pengait ?: '-' }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Kategori</div>
                                 <div class="info-value">
                                     @if ($kosakata->kategori)
-                                        <a href="{{ route('admin.kategori.show', $kosakata->kategori) }}" class="text-decoration-none">
+                                        {{-- Link aktif otomatis setelah CRUD Kategori (route admin.kategori.show) dibuat --}}
+                                        @if (\Illuminate\Support\Facades\Route::has('admin.kategori.show'))
+                                            <a href="{{ route('admin.kategori.show', $kosakata->kategori) }}" class="text-decoration-none">
+                                                {{ $kosakata->kategori->nama }}
+                                            </a>
+                                        @else
                                             {{ $kosakata->kategori->nama }}
-                                        </a>
+                                        @endif
                                     @else
                                         -
                                     @endif
                                 </div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">Level HSK</div>
-                                <div class="info-value">{{ $kosakata->levelHsk->nama ?? '-' }}</div>
+                                <div class="info-label">Level TOCFL</div>
+                                <div class="info-value">{{ $kosakata->levelTocfl->nama ?? '-' }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Urutan</div>
@@ -247,6 +274,124 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- Pecahan karakter, relasi, grup --}}
+            <div class="row g-4 mt-0">
+
+                <div class="col-lg-6">
+                    <div class="card filter-card shadow-sm h-100">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="fas fa-puzzle-piece text-primary me-2 opacity-75"></i>Pecahan Karakter
+                                <span class="badge {{ $kosakata->pecahan->count() ? 'badge-aktif' : 'badge-nonaktif' }} ms-1">{{ $kosakata->pecahan->count() }}</span>
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table-hover mb-0 table">
+                                    <thead>
+                                        <tr>
+                                            <th width="40">#</th>
+                                            <th>Karakter</th>
+                                            <th>Pinyin</th>
+                                            <th>Arti</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($kosakata->pecahan as $p)
+                                            <tr>
+                                                <td class="text-muted">{{ $p->urutan }}</td>
+                                                <td><span class="hanzi-text">{{ $p->karakter?->hanzi ?? '-' }}</span></td>
+                                                <td>{{ $p->pinyin_efektif ?: '-' }}</td>
+                                                <td>
+                                                    {{ $p->arti_efektif ?: '-' }}
+                                                    @if ($p->penjelasan)
+                                                        <div class="text-muted" style="font-size:.75rem;">{{ $p->penjelasan }}</div>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="p-0 text-center">
+                                                    <div class="empty-state" style="padding:36px 20px;">
+                                                        <div class="empty-state-icon"><i class="fas fa-puzzle-piece"></i></div>
+                                                        <div class="fw-semibold text-secondary mb-1">Belum ada pecahan karakter</div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card filter-card shadow-sm h-100">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="fas fa-project-diagram text-primary me-2 opacity-75"></i>Relasi Kata
+                                <span class="badge {{ $relasi->count() ? 'badge-aktif' : 'badge-nonaktif' }} ms-1">{{ $relasi->count() }}</span>
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table-hover mb-0 table">
+                                    <thead>
+                                        <tr>
+                                            <th>Jenis</th>
+                                            <th>Kata</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($relasi as $r)
+                                            <tr>
+                                                <td><span class="badge badge-level">{{ \Illuminate\Support\Str::headline($r['jenis']) }}</span></td>
+                                                <td>
+                                                    <a href="{{ route('admin.kosakata.show', $r['kata']) }}" class="text-decoration-none">
+                                                        <span class="hanzi-text">{{ $r['kata']->hanzi }}</span>
+                                                    </a>
+                                                    <span class="text-muted ms-1">{{ $r['kata']->pinyin }}</span>
+                                                    <div class="text-muted" style="font-size:.75rem;">
+                                                        {{ $r['kata']->arti_indonesia ?: $r['kata']->english }}
+                                                        @if ($r['masuk'])
+                                                            &middot; dicatat dari sisi kata itu
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="2" class="p-0 text-center">
+                                                    <div class="empty-state" style="padding:36px 20px;">
+                                                        <div class="empty-state-icon"><i class="fas fa-project-diagram"></i></div>
+                                                        <div class="fw-semibold text-secondary mb-1">Belum ada relasi kata</div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card form-card">
+                        <div class="card-body">
+                            <div class="section-divider"><i class="fas fa-layer-group me-2"></i>Grup Kosakata</div>
+                            @forelse ($kosakata->grupKosakatas as $grup)
+                                <span class="badge badge-level me-1 mb-1">{{ $grup->nama }}</span>
+                            @empty
+                                <span class="text-muted" style="font-size:.83rem;">Kata ini belum masuk grup mana pun.</span>
+                            @endforelse
                         </div>
                     </div>
                 </div>

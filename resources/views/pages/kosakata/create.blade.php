@@ -118,20 +118,21 @@
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label for="baca_indonesia" class="form-label">Cara Baca Indonesia</label>
-                                        <input type="text" id="baca_indonesia" name="baca_indonesia" maxlength="60"
-                                            class="form-control @error('baca_indonesia') is-invalid @enderror"
-                                            value="{{ old('baca_indonesia') }}" placeholder="shuei">
-                                        @error('baca_indonesia')
+                                        <label for="zhuyin" class="form-label">Zhuyin</label>
+                                        <input type="text" id="zhuyin" name="zhuyin" maxlength="100"
+                                            class="form-control @error('zhuyin') is-invalid @enderror"
+                                            value="{{ old('zhuyin') }}" placeholder="ㄕㄨㄟˇ">
+                                        @error('zhuyin')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="arti_indonesia" class="form-label">Arti Indonesia <span class="required-mark">*</span></label>
+                                        <label for="arti_indonesia" class="form-label">Arti Indonesia</label>
                                         <input type="text" id="arti_indonesia" name="arti_indonesia" maxlength="150"
                                             class="form-control @error('arti_indonesia') is-invalid @enderror"
-                                            value="{{ old('arti_indonesia') }}" placeholder="air" required>
+                                            value="{{ old('arti_indonesia') }}" placeholder="air">
+                                        <div class="form-text">Boleh dikosongkan dulu dan diisi belakangan.</div>
                                         @error('arti_indonesia')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -147,18 +148,71 @@
                                         @enderror
                                     </div>
 
-                                    <div class="col-12">
-                                        <label for="kegunaan" class="form-label">Kegunaan Kata</label>
-                                        <textarea id="kegunaan" name="kegunaan" rows="3" maxlength="2000"
-                                            class="form-control @error('kegunaan') is-invalid @enderror"
-                                            placeholder="Contoh: Dipakai untuk menyebut air minum sehari-hari, misalnya saat memesan minuman atau mengatakan haus.">{{ old('kegunaan') }}</textarea>
-                                        <div class="form-text">Jelaskan kapan / dalam situasi apa kata ini dipakai (opsional).</div>
-                                        @error('kegunaan')
+                                    <div class="col-md-6">
+                                        <label for="arti_singkat" class="form-label">Arti Singkat</label>
+                                        <input type="text" id="arti_singkat" name="arti_singkat" maxlength="100"
+                                            class="form-control @error('arti_singkat') is-invalid @enderror"
+                                            value="{{ old('arti_singkat') }}" placeholder="air">
+                                        <div class="form-text">Dipakai sebagai teks pilihan jawaban di soal. Kosongkan kalau arti Indonesia sudah cukup singkat.</div>
+                                        @error('arti_singkat')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="baca_indonesia" class="form-label">Cara Baca Indonesia</label>
+                                        <input type="text" id="baca_indonesia" name="baca_indonesia" maxlength="60"
+                                            class="form-control @error('baca_indonesia') is-invalid @enderror"
+                                            value="{{ old('baca_indonesia') }}" placeholder="shuei">
+                                        @error('baca_indonesia')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <div class="col-md-4">
+                                        <label for="jenis_kata" class="form-label">Jenis Kata</label>
+                                        <select id="jenis_kata" name="jenis_kata" class="form-select @error('jenis_kata') is-invalid @enderror">
+                                            <option value="">- Belum ditentukan -</option>
+                                            @foreach ($jenisKata as $jenis)
+                                                <option value="{{ $jenis }}"
+                                                    {{ (string) old('jenis_kata') === (string) $jenis ? 'selected' : '' }}>
+                                                    {{ \Illuminate\Support\Str::headline($jenis) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('jenis_kata')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="sub_jenis" class="form-label">Sub Jenis</label>
+                                        <select id="sub_jenis" name="sub_jenis" class="form-select @error('sub_jenis') is-invalid @enderror">
+                                            <option value="">- Tidak ada -</option>
+                                            @foreach ($subJenis as $sub)
+                                                <option value="{{ $sub }}"
+                                                    {{ (string) old('sub_jenis') === (string) $sub ? 'selected' : '' }}>
+                                                    {{ \Illuminate\Support\Str::headline($sub) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="form-text">Mis. transitif / intransitif untuk kata kerja.</div>
+                                        @error('sub_jenis')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="urutan" class="form-label">Urutan</label>
+                                        <input type="number" id="urutan" name="urutan" min="0"
+                                            class="form-control @error('urutan') is-invalid @enderror"
+                                            value="{{ old('urutan') }}" placeholder="Otomatis">
+                                        @error('urutan')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
                                         <label for="kategori_id" class="form-label">Kategori</label>
                                         <select id="kategori_id" name="kategori_id" class="form-select @error('kategori_id') is-invalid @enderror">
                                             <option value="">- Tanpa kategori -</option>
@@ -174,28 +228,40 @@
                                         @enderror
                                     </div>
 
-                                    <div class="col-md-4">
-                                        <label for="level_hsk_id" class="form-label">Level HSK</label>
-                                        <select id="level_hsk_id" name="level_hsk_id" class="form-select @error('level_hsk_id') is-invalid @enderror">
+                                    <div class="col-md-6">
+                                        <label for="level_tocfl_id" class="form-label">Level TOCFL</label>
+                                        <select id="level_tocfl_id" name="level_tocfl_id" class="form-select @error('level_tocfl_id') is-invalid @enderror">
                                             <option value="">- Tanpa level -</option>
                                             @foreach ($levels as $level)
                                                 <option value="{{ $level->id }}"
-                                                    {{ (string) old('level_hsk_id') === (string) $level->id ? 'selected' : '' }}>
+                                                    {{ (string) old('level_tocfl_id') === (string) $level->id ? 'selected' : '' }}>
                                                     {{ $level->nama }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('level_hsk_id')
+                                        @error('level_tocfl_id')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
-                                    <div class="col-md-4">
-                                        <label for="urutan" class="form-label">Urutan</label>
-                                        <input type="number" id="urutan" name="urutan" min="0"
-                                            class="form-control @error('urutan') is-invalid @enderror"
-                                            value="{{ old('urutan') }}" placeholder="Otomatis">
-                                        @error('urutan')
+                                    <div class="col-12">
+                                        <label for="kegunaan" class="form-label">Kegunaan Kata</label>
+                                        <textarea id="kegunaan" name="kegunaan" rows="3" maxlength="2000"
+                                            class="form-control @error('kegunaan') is-invalid @enderror"
+                                            placeholder="Contoh: Dipakai untuk menyebut air minum sehari-hari, misalnya saat memesan minuman atau mengatakan haus.">{{ old('kegunaan') }}</textarea>
+                                        <div class="form-text">Jelaskan kapan / dalam situasi apa kata ini dipakai (opsional).</div>
+                                        @error('kegunaan')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="kata_pengait" class="form-label">Kata Pengait</label>
+                                        <textarea id="kata_pengait" name="kata_pengait" rows="2" maxlength="1000"
+                                            class="form-control @error('kata_pengait') is-invalid @enderror"
+                                            placeholder="Contoh: pengait ingatan berupa asosiasi bunyi, bentuk, atau cerita singkat.">{{ old('kata_pengait') }}</textarea>
+                                        <div class="form-text">Pengait untuk membantu menghafal (opsional).</div>
+                                        @error('kata_pengait')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -274,7 +340,8 @@
                             <div class="card-body">
                                 <div class="section-divider"><i class="fas fa-lightbulb me-2"></i>Petunjuk</div>
                                 <ul class="text-muted ps-3 mb-0" style="font-size:.83rem;">
-                                    <li class="mb-2">Hanzi, pinyin, dan arti Indonesia wajib diisi. Kombinasi hanzi + pinyin tidak boleh sama dengan kosakata lain.</li>
+                                    <li class="mb-2">Hanzi dan pinyin wajib diisi. Kombinasi hanzi + pinyin tidak boleh sama dengan kosakata lain (huruf besar/kecil dan tanda nada dibedakan).</li>
+                                    <li class="mb-2">Arti Indonesia boleh dikosongkan dulu, tapi isi sebelum kata dipakai untuk soal. Arti singkat dipakai sebagai teks pilihan jawaban.</li>
                                     <li class="mb-2">Contoh kalimat bisa ditambah sebanyak yang dibutuhkan, dan disimpan bersamaan dengan kosakata.</li>
                                     <li>Urutan dikosongkan = otomatis ditaruh di bagian akhir.</li>
                                 </ul>

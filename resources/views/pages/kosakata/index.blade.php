@@ -61,6 +61,7 @@
     .badge-aktif    { background: #dcfce7; color: #15803d; }
     .badge-nonaktif { background: #f1f5f9; color: #64748b; }
     .badge-level    { background: #e8f0fe; color: #1a73e8; }
+    .badge-jenis    { background: #f5f3ff; color: #7c3aed; }
 
     /* ===== ACTION BUTTONS ===== */
     .btn-action { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-size: .75rem; padding: 0; border: none; transition: all .15s ease; }
@@ -152,10 +153,10 @@
                 <div class="col-6 col-md-3">
                     <div class="card stat-card purple">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="stat-icon purple"><i class="fas fa-tags"></i></div>
+                            <div class="stat-icon purple"><i class="fas fa-question-circle"></i></div>
                             <div>
-                                <div class="stat-value">{{ $stats['tanpa_kategori'] }}</div>
-                                <div class="stat-label">Tanpa Kategori</div>
+                                <div class="stat-value">{{ $stats['tanpa_arti'] }}</div>
+                                <div class="stat-label">Belum Ada Arti</div>
                             </div>
                         </div>
                     </div>
@@ -183,7 +184,7 @@
                 <div class="filter-section">
                     <form method="GET" action="{{ route('admin.kosakata.index') }}">
                         <div class="row g-2 align-items-end">
-                            <div class="col-12 col-md-4">
+                            <div class="col-12 col-md-3">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                                     <input type="text" name="search" class="form-control"
@@ -204,11 +205,11 @@
                             </div>
 
                             <div class="col-6 col-md-2">
-                                <select name="level_hsk_id" class="form-select">
+                                <select name="level_tocfl_id" class="form-select">
                                     <option value="">Semua Level</option>
-                                    <option value="kosong" {{ request('level_hsk_id') === 'kosong' ? 'selected' : '' }}>Tanpa level</option>
+                                    <option value="kosong" {{ request('level_tocfl_id') === 'kosong' ? 'selected' : '' }}>Tanpa level</option>
                                     @foreach ($levels as $level)
-                                        <option value="{{ $level->id }}" {{ (string) request('level_hsk_id') === (string) $level->id ? 'selected' : '' }}>
+                                        <option value="{{ $level->id }}" {{ (string) request('level_tocfl_id') === (string) $level->id ? 'selected' : '' }}>
                                             {{ $level->nama }}
                                         </option>
                                     @endforeach
@@ -216,10 +217,24 @@
                             </div>
 
                             <div class="col-6 col-md-2">
-                                <select name="contoh" class="form-select">
-                                    <option value="">Semua Contoh</option>
-                                    <option value="ada" {{ request('contoh') === 'ada' ? 'selected' : '' }}>Ada contoh kalimat</option>
-                                    <option value="kosong" {{ request('contoh') === 'kosong' ? 'selected' : '' }}>Belum ada contoh</option>
+                                <select name="jenis_kata" class="form-select">
+                                    <option value="">Semua Jenis</option>
+                                    <option value="kosong" {{ request('jenis_kata') === 'kosong' ? 'selected' : '' }}>Tanpa jenis kata</option>
+                                    @foreach ($jenisKata as $jenis)
+                                        <option value="{{ $jenis }}" {{ request('jenis_kata') === $jenis ? 'selected' : '' }}>
+                                            {{ \Illuminate\Support\Str::headline($jenis) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-6 col-md-2">
+                                <select name="lengkap" class="form-select">
+                                    <option value="">Semua Kelengkapan</option>
+                                    <option value="ada_contoh" {{ request('lengkap') === 'ada_contoh' ? 'selected' : '' }}>Ada contoh kalimat</option>
+                                    <option value="tanpa_contoh" {{ request('lengkap') === 'tanpa_contoh' ? 'selected' : '' }}>Belum ada contoh</option>
+                                    <option value="tanpa_arti" {{ request('lengkap') === 'tanpa_arti' ? 'selected' : '' }}>Belum ada arti Indonesia</option>
+                                    <option value="tanpa_pecahan" {{ request('lengkap') === 'tanpa_pecahan' ? 'selected' : '' }}>Belum ada pecahan karakter</option>
                                 </select>
                             </div>
 
@@ -246,6 +261,7 @@
                                     <th>Hanzi</th>
                                     <th>Pinyin</th>
                                     <th>Arti</th>
+                                    <th>Jenis</th>
                                     <th>Kategori</th>
                                     <th>Level</th>
                                     <th>Contoh</th>
@@ -261,13 +277,20 @@
 
                                         <td>
                                             {{ $kosakata->pinyin }}
+                                            @if ($kosakata->zhuyin)
+                                                <div class="text-muted" style="font-size:.75rem;">{{ $kosakata->zhuyin }}</div>
+                                            @endif
                                             @if ($kosakata->baca_indonesia)
                                                 <div class="text-muted" style="font-size:.75rem;">{{ $kosakata->baca_indonesia }}</div>
                                             @endif
                                         </td>
 
                                         <td style="max-width:240px;">
-                                            {{ $kosakata->arti_indonesia }}
+                                            @if ($kosakata->arti_indonesia)
+                                                {{ $kosakata->arti_indonesia }}
+                                            @else
+                                                <span class="text-muted fst-italic">Belum ada arti Indonesia</span>
+                                            @endif
                                             @if ($kosakata->english)
                                                 <div class="text-muted" style="font-size:.75rem;">{{ $kosakata->english }}</div>
                                             @endif
@@ -276,11 +299,22 @@
                                             @endif
                                         </td>
 
+                                        <td>
+                                            @if ($kosakata->jenis_kata)
+                                                <span class="badge badge-jenis">{{ \Illuminate\Support\Str::headline($kosakata->jenis_kata) }}</span>
+                                                @if ($kosakata->sub_jenis)
+                                                    <div class="text-muted" style="font-size:.72rem;">{{ \Illuminate\Support\Str::headline($kosakata->sub_jenis) }}</div>
+                                                @endif
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+
                                         <td class="text-muted">{{ $kosakata->kategori->nama ?? '-' }}</td>
 
                                         <td>
-                                            @if ($kosakata->levelHsk)
-                                                <span class="badge badge-level">{{ $kosakata->levelHsk->nama }}</span>
+                                            @if ($kosakata->levelTocfl)
+                                                <span class="badge badge-level">{{ $kosakata->levelTocfl->nama }}</span>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
@@ -304,7 +338,8 @@
                                                 </a>
                                                 <button type="button" class="btn btn-action btn-hapus"
                                                     data-id="{{ $kosakata->id }}" data-hanzi="{{ $kosakata->hanzi }}"
-                                                    data-jumlah="{{ $kosakata->contoh_kalimats_count }}" title="Hapus">
+                                                    data-jumlah="{{ $kosakata->contoh_kalimats_count }}"
+                                                    data-soal="{{ $kosakata->soals_count }}" title="Hapus">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
                                                 <form id="form-hapus-{{ $kosakata->id }}"
@@ -317,7 +352,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="p-0 text-center">
+                                        <td colspan="9" class="p-0 text-center">
                                             <div class="empty-state">
                                                 <div class="empty-state-icon"><i class="fas fa-language"></i></div>
                                                 <div class="fw-semibold text-secondary mb-1">Belum ada data kosakata</div>
@@ -358,12 +393,17 @@
                 const id = this.dataset.id;
                 const hanzi = this.dataset.hanzi;
                 const jumlah = parseInt(this.dataset.jumlah || 0);
+                const soal = parseInt(this.dataset.soal || 0);
 
                 let teks = `Kosakata "${hanzi}" akan dihapus permanen.`;
                 if (jumlah > 0) {
                     teks += ` ${jumlah} contoh kalimatnya ikut terhapus.`;
                 }
-                teks += ' Progres hafalan dan riwayat review pelajar untuk kata ini juga ikut terhapus.';
+                teks += ' Pecahan karakter, relasi, keanggotaan grup, dan progres hafalan kata ini juga ikut terhapus.';
+                if (soal > 0) {
+                    teks += ` ${soal} soal yang memakai kata ini tidak ikut terhapus, tapi diberi status ditolak (disembunyikan dari latihan dan ujian).`;
+                }
+                teks += ' Riwayat review tetap tersimpan.';
 
                 swal({
                     title: 'Hapus Kosakata?',
