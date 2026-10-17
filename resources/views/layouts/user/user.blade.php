@@ -93,16 +93,14 @@
             @php
                 // pola route => [judul, ikon FA6]   (urutkan dari yang paling spesifik)
                 $headers = [
-                    'admin.dashboard'          => ['Dashboard',          'fas fa-house'],
-                    'admin.kategori*'          => ['Kategori',           'fas fa-tag'],
-                    'admin.tingkat-hsk*'       => ['Tingkat HSK',        'fas fa-layer-group'],
-                    'admin.kosakata*'          => ['Kosakata',           'fas fa-font'],
-                    'admin.grup-soal*'         => ['Grup & Soal Latihan', 'fas fa-square-check'],
-                    'admin.soal*'              => ['Grup & Soal Latihan', 'fas fa-square-check'],
-                    'admin.paragraf*'          => ['Paragraf',           'fas fa-book-open'],
-                    'admin.pelajar*'           => ['Pelajar',            'fas fa-users'],
-                    'admin.pengaturan-website*'=> ['Pengaturan Website', 'fas fa-gear'],
-                    'admin.profil*'            => ['Profil Saya',        'fas fa-circle-user'],
+                    'admin.dashboard'  => ['Dashboard',       'fas fa-tachometer-alt'],
+                    'admin.kosakata*'  => ['Kosakata',        'fas fa-language'],
+                    'admin.hafalan*'   => ['Progres Hafalan', 'fas fa-chart-pie'],
+                    'admin.flashcard*' => ['Flashcard',       'fas fa-layer-group'],
+                    'admin.grup-soal*' => ['Paket Soal',      'fas fa-clipboard-list'],
+                    'admin.soal*'      => ['Paket Soal',      'fas fa-clipboard-list'],
+                    'admin.kerjakan*'  => ['Kerjakan Soal',   'fas fa-pencil-alt'],
+                    'admin.profil*'    => ['Profil Saya',     'fas fa-user-circle'],
                 ];
 
                 // akhiran route => label breadcrumb halaman terakhir

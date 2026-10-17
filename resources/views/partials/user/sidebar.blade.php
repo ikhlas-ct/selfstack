@@ -1,30 +1,3 @@
-@php
-    /*
-     * Helper kecil: pakai route bernama kalau ada, kalau belum ada jatuh ke URL biasa
-     * supaya sidebar tidak error "Route not defined" saat modul belum dibuat.
-     * Sesuaikan nama route / path di $menu di bawah dengan route.php kamu.
-     */
-    $link = fn (string $name, string $path) => \Illuminate\Support\Facades\Route::has($name)
-        ? route($name)
-        : url($path);
-
-    $authUser   = auth()->user();
-    $profilNama = $authUser?->admin?->nama ?? $authUser?->username ?? 'Profil';
-
-    // [label, icon FA6, url, pola route untuk state "active"]
-    $menu = [
-        ['Dashboard',            'fas fa-house',          $link('admin.dashboard', 'admin/dashboard'),                 ['admin.dashboard']],
-        ['Kategori',             'fas fa-tag',            $link('admin.kategori.index', 'admin/kategori'),             ['admin.kategori*']],
-        ['Tingkat HSK',          'fas fa-layer-group',    $link('admin.tingkat-hsk.index', 'admin/tingkat-hsk'),       ['admin.tingkat-hsk*']],
-        ['Kosakata',             'fas fa-font',           $link('admin.kosakata.index', 'admin/kosakata'),             ['admin.kosakata*']],
-        ['Grup & Soal Latihan',  'fas fa-square-check',   $link('admin.grup-soal.index', 'admin/grup-soal'),           ['admin.grup-soal*', 'admin.soal*']],
-        ['Paragraf',             'fas fa-book-open',      $link('admin.paragraf.index', 'admin/paragraf'),             ['admin.paragraf*']],
-        ['Pelajar',              'fas fa-users',          $link('admin.pelajar.index', 'admin/pelajar'),               ['admin.pelajar*']],
-        ['Pengaturan Website',   'fas fa-gear',           $link('admin.pengaturan-website.edit', 'admin/pengaturan-website'), ['admin.pengaturan-website*']],
-        [$profilNama,            'fas fa-circle-user',    $link('admin.profil', 'admin/profil'),                       ['admin.profil*']],
-    ];
-@endphp
-
 <!-- Sidebar (khusus admin) -->
 <div class="sidebar-logo">
     <!-- Logo Header -->
@@ -59,20 +32,61 @@
     <div class="sidebar-content">
         <ul class="nav nav-secondary">
 
-            @foreach ($menu as [$label, $icon, $url, $patterns])
-                <li class="nav-item {{ request()->routeIs(...$patterns) ? 'active' : '' }}">
-                    <a href="{{ $url }}">
-                        <i class="{{ $icon }}"></i>
-                        <p>{{ $label }}</p>
-                    </a>
-                </li>
-            @endforeach
+            <!-- Dashboard -->
+            <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('admin.dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <p>Dashboard</p>
+                </a>
+            </li>
+
+            <!-- Kosakata (aktif juga di halaman create, edit, show, dan import) -->
+            <li class="nav-item {{ request()->routeIs('admin.kosakata*') ? 'active' : '' }}">
+                <a href="{{ route('admin.kosakata.index') }}">
+                    <i class="fas fa-language"></i>
+                    <p>Kosakata</p>
+                </a>
+            </li>
+
+            <!-- Progres Hafalan -->
+            <li class="nav-item {{ request()->routeIs('admin.hafalan*') ? 'active' : '' }}">
+                <a href="{{ route('admin.hafalan.index') }}">
+                    <i class="fas fa-chart-pie"></i>
+                    <p>Progres Hafalan</p>
+                </a>
+            </li>
+
+            <!-- Flashcard Hafalan -->
+            <li class="nav-item {{ request()->routeIs('admin.flashcard*') ? 'active' : '' }}">
+                <a href="{{ route('admin.flashcard.index') }}">
+                    <i class="fas fa-layer-group"></i>
+                    <p>Flashcard</p>
+                </a>
+            </li>
+
+            <!-- Paket Soal (aktif juga di halaman detail paket, tambah/ubah paket, dan tambah/ubah soal) -->
+            <li class="nav-item {{ request()->routeIs('admin.grup-soal*', 'admin.soal*') ? 'active' : '' }}">
+                <a href="{{ route('admin.grup-soal.index') }}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <p>Paket Soal</p>
+                </a>
+            </li>
+
+            <!-- Kerjakan Soal (aktif juga di halaman paket, mengerjakan soal, dan hasil) -->
+            <li class="nav-item {{ request()->routeIs('admin.kerjakan*') ? 'active' : '' }}">
+                <a href="{{ route('admin.kerjakan.index') }}">
+                    <i class="fas fa-pencil-alt"></i>
+                    <p>Kerjakan Soal</p>
+                </a>
+            </li>
+
+            {{-- Menu berikutnya ditambah di sini setelah route-nya dibuat. --}}
 
             <!-- Logout -->
-            <li class="nav-item">
+            <li class="nav-item mt-4">
                 <a href="{{ route('logout') }}"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="fas fa-right-from-bracket"></i>
+                    <i class="fas fa-sign-out-alt"></i>
                     <p>Logout</p>
                 </a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
