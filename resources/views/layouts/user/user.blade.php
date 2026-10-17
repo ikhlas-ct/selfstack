@@ -65,13 +65,14 @@
     <link rel="stylesheet" href="{{ asset('user/css/plugins.min.css') }}">
     <link rel="stylesheet" href="{{ asset('user/css/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('user/css/override.css') }}">
+    <link rel="stylesheet" href="{{ asset('user/css/red-theme.css') }}">
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
 
     @yield('styles')
     <style>
-        
+
     </style>
 </head>
 
@@ -85,6 +86,83 @@
             <div class="main-header">
                 @include('partials.user.header')
             </div>
+
+            {{-- ===== PAGE HEADER OTOMATIS (judul + ikon + breadcrumb dari nama route) =====
+                 Timpa per halaman bila perlu: @section('page_title'), @section('page_icon'),
+                 @section('hide_page_header', '1') untuk menyembunyikannya. --}}
+            @php
+                // pola route => [judul, ikon FA6]   (urutkan dari yang paling spesifik)
+                $headers = [
+                    'admin.dashboard'          => ['Dashboard',          'fas fa-house'],
+                    'admin.kategori*'          => ['Kategori',           'fas fa-tag'],
+                    'admin.tingkat-hsk*'       => ['Tingkat HSK',        'fas fa-layer-group'],
+                    'admin.kosakata*'          => ['Kosakata',           'fas fa-font'],
+                    'admin.grup-soal*'         => ['Grup & Soal Latihan', 'fas fa-square-check'],
+                    'admin.soal*'              => ['Grup & Soal Latihan', 'fas fa-square-check'],
+                    'admin.paragraf*'          => ['Paragraf',           'fas fa-book-open'],
+                    'admin.pelajar*'           => ['Pelajar',            'fas fa-users'],
+                    'admin.pengaturan-website*'=> ['Pengaturan Website', 'fas fa-gear'],
+                    'admin.profil*'            => ['Profil Saya',        'fas fa-circle-user'],
+                ];
+
+                // akhiran route => label breadcrumb halaman terakhir
+                $actions = ['create' => 'Tambah', 'edit' => 'Ubah', 'show' => 'Detail', 'import' => 'Import'];
+
+                $title = trim($__env->yieldContent('page_title')) ?: null;
+                $icon  = trim($__env->yieldContent('page_icon')) ?: null;
+
+                foreach ($headers as $pattern => [$t, $i]) {
+                    if (request()->routeIs($pattern)) {
+                        $title ??= $t;
+                        $icon  ??= $i;
+                        break;
+                    }
+                }
+
+                // breadcrumb
+                $routeName = request()->route()?->getName() ?? '';
+                $parts     = explode('.', $routeName);
+                $last      = array_pop($parts);
+                $base      = implode('.', $parts);
+                $isDash    = request()->routeIs('admin.dashboard');
+
+                $crumbs = ['Dashboard' => $isDash ? null : (\Illuminate\Support\Facades\Route::has('admin.dashboard') ? route('admin.dashboard') : url('admin/dashboard'))];
+
+                if (! $isDash && $title) {
+                    if (isset($actions[$last]) && \Illuminate\Support\Facades\Route::has($base . '.index')) {
+                        $crumbs[$title]          = route($base . '.index');   // judul jadi link ke daftar
+                        $crumbs[$actions[$last]] = null;                      // halaman aktif
+                    } else {
+                        $crumbs[$title] = null;
+                    }
+                }
+
+                $hide = $__env->hasSection('hide_page_header') || ! $title;
+            @endphp
+
+            @unless ($hide)
+                <div class="container cg-page-header-wrap">
+                    <div class="page-inner pb-0">
+                        <div class="page-header-card">
+                            <div class="phc-icon"><i class="{{ $icon ?? 'fas fa-gear' }}"></i></div>
+                            <div>
+                                <h1 class="phc-title">{{ $title }}</h1>
+                                <ol class="phc-breadcrumb">
+                                    @foreach ($crumbs as $label => $url)
+                                        <li>
+                                            @if ($url)
+                                                <a href="{{ $url }}">{{ $label }}</a>
+                                            @else
+                                                {{ $label }}
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endunless
 
             @yield('content')
 

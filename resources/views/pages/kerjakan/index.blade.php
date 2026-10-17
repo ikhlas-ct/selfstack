@@ -118,8 +118,21 @@
     .grup-aksi { margin-top: auto; padding-top: 12px; border-top: 1px dashed #dbe3ec; }
     .pagination { justify-content: center; margin-top: 1.25rem; }
 
+.grup-top { display: flex; align-items: flex-start; gap: 12px; }
+    .grup-ikon { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+    .grup-ikon.latihan { background: #fef3c7; color: #b45309; }
+    .grup-ikon.ujian { background: #fee2e2; color: #b91c1c; }
+    .grup-card { padding: 20px; }
+    .grup-card:hover { transform: translateY(-2px); }
+    .grup-prog { margin-bottom: 14px; }
+    .grup-prog .trek { height: 7px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+    .grup-prog .trek > span { display: block; height: 100%; border-radius: 999px; background: #16a34a; }
+    .grup-prog small { display: block; margin-top: 5px; font-size: .72rem; color: var(--gk-muted); }
+    .stat-row .stat-box:nth-child(3) .stat-num { color: #15803d; }
+
 @media (prefers-reduced-motion: reduce) {
         .btn-primary, .grup-card, .form-control, .opsi-pilih { transition: none; }
+        .grup-card:hover { transform: none; }
         .btn-primary:hover { transform: none; }
     }
 </style>
@@ -220,12 +233,19 @@
                         @endphp
                         <div class="col-md-6 col-xl-4">
                             <div class="grup-card {{ $jalan ? 'berjalan' : '' }}">
-                                <h6 class="grup-nama">
-                                    <a href="{{ route('admin.kerjakan.detail', $grup) }}">{{ $grup->judul }}</a>
-                                </h6>
-                                @if ($grup->deskripsi)
-                                    <div class="grup-ket">{{ $grup->deskripsi }}</div>
-                                @endif
+                                <div class="grup-top">
+                                    <span class="grup-ikon {{ $grup->jenis === 'ujian' ? 'ujian' : 'latihan' }}" aria-hidden="true">
+                                        <i class="fas {{ $grup->jenis === 'ujian' ? 'fa-stopwatch' : 'fa-dumbbell' }}"></i>
+                                    </span>
+                                    <div style="min-width:0;">
+                                        <h6 class="grup-nama">
+                                            <a href="{{ route('admin.kerjakan.detail', $grup) }}">{{ $grup->judul }}</a>
+                                        </h6>
+                                        @if ($grup->deskripsi)
+                                            <div class="grup-ket">{{ $grup->deskripsi }}</div>
+                                        @endif
+                                    </div>
+                                </div>
 
                                 <div class="grup-badges">
                                     <span class="badge {{ $grup->jenis === 'ujian' ? 'badge-ujian' : 'badge-latihan' }}">{{ $grup->jenis === 'ujian' ? 'Ujian' : 'Latihan' }}</span>
@@ -250,6 +270,17 @@
                                         <span><i class="fas fa-trophy"></i>Terbaik {{ (float) $stat->skor_terbaik }}</span>
                                     @endif
                                 </div>
+
+                                @if ($jalan)
+                                    @php
+                                        $dj = (int) ($dijawab[$grup->id] ?? 0);
+                                        $tt = max(1, (int) $grup->soals_count);
+                                    @endphp
+                                    <div class="grup-prog">
+                                        <div class="trek" aria-hidden="true"><span style="width: {{ min(100, round($dj / $tt * 100)) }}%"></span></div>
+                                        <small>Sudah dijawab {{ $dj }} dari {{ $tt }} soal</small>
+                                    </div>
+                                @endif
 
                                 <div class="grup-aksi">
                                     <a href="{{ route('admin.kerjakan.detail', $grup) }}" class="btn {{ $jalan ? 'btn-success' : 'btn-primary' }} w-100">

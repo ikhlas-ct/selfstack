@@ -103,6 +103,11 @@
     .aturan-list li { display: flex; gap: 10px; padding: 6px 0; }
     .aturan-list i { color: var(--gk-faint); width: 16px; text-align: center; margin-top: 3px; flex-shrink: 0; }
 
+.prog-mini { height: 8px; border-radius: 999px; background: #e2e8f0; overflow: hidden; margin-bottom: 16px; }
+    .prog-mini > span { display: block; height: 100%; border-radius: 999px; background: #16a34a; }
+    .riwayat-row { border-radius: 10px; }
+    .stat-row .stat-box { display: flex; flex-direction: column; justify-content: center; }
+
 @media (prefers-reduced-motion: reduce) {
         .btn-primary, .grup-card, .form-control, .opsi-pilih { transition: none; }
         .btn-primary:hover { transform: none; }
@@ -212,12 +217,10 @@
 
                             <div class="info-label mb-1">Cara kerjanya</div>
                             <ul class="aturan-list">
-                                @if ($ujian)
-                                    <li><i class="fas fa-eye-slash"></i><span>Benar atau salah baru terlihat setelah ujian selesai.</span></li>
-                                    <li><i class="fas fa-exchange-alt"></i><span>Jawaban boleh diubah dan soal boleh dikerjakan tidak berurutan sebelum ujian diakhiri.</span></li>
-                                @else
-                                    <li><i class="fas fa-check-double"></i><span>Jawaban langsung diperiksa lengkap dengan penjelasannya. Jawaban yang sudah diperiksa tidak bisa diubah.</span></li>
-                                @endif
+                                <li><i class="fas fa-eye-slash"></i><span>Kerjakan semua soal dulu. Benar atau salahnya tidak ditampilkan selama kamu mengerjakan, baru terlihat setelah {{ $ujian ? 'ujian' : 'latihan' }} selesai.</span></li>
+                                <li><i class="fas fa-exchange-alt"></i><span>Jawaban boleh diubah dan soal boleh dikerjakan tidak berurutan sebelum kamu mengakhirinya.</span></li>
+                                <li><i class="fas fa-flag"></i><span>Soal yang masih ragu bisa kamu tandai kuning, supaya mudah dicek lagi sebelum mengakhiri.</span></li>
+                                <li><i class="fas fa-lightbulb"></i><span>Pembahasan lengkap tiap soal ada di halaman hasil.</span></li>
                                 @if ($grup->durasi_menit)
                                     <li><i class="fas fa-clock"></i><span>Waktu {{ $grup->durasi_menit }} menit sejak dimulai. Saat habis, percobaan otomatis diakhiri dan jawaban yang sudah tersimpan dinilai.</span></li>
                                 @endif
@@ -282,6 +285,10 @@
                                         Dimulai {{ ($berjalan->mulai_pada ?? $berjalan->created_at)?->format('d/m/Y H:i') }}.
                                         Sudah dijawab <strong>{{ $dijawabBerjalan }}</strong> dari {{ $berjalan->jumlah_soal }} soal.
                                     </p>
+
+                                    <div class="prog-mini" aria-hidden="true">
+                                        <span style="width: {{ $berjalan->jumlah_soal ? round($dijawabBerjalan / $berjalan->jumlah_soal * 100) : 0 }}%"></span>
+                                    </div>
 
                                     <a href="{{ route('admin.kerjakan.soal', [$berjalan, 'no' => $nomorLanjut]) }}" class="btn btn-success w-100 mb-2">
                                         <i class="fas fa-play me-1"></i> Lanjutkan ke soal {{ $nomorLanjut }}

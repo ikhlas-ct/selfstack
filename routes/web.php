@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FlashcardController;
-use App\Http\Controllers\Admin\GrupSoalController;
 use App\Http\Controllers\Admin\HafalanController;
 use App\Http\Controllers\Admin\KerjakanSoalController;
 use App\Http\Controllers\Admin\KosakataController;
@@ -54,19 +53,31 @@ Route::middleware('auth')->group(function () {
         Route::get('flashcard/mulai', [FlashcardController::class, 'mulai'])->name('flashcard.mulai');
         Route::post('flashcard/jawab', [FlashcardController::class, 'jawab'])->name('flashcard.jawab');
 
-        // Paket soal (GrupSoal) -> admin.grup-soal.index / create / store / show / edit / update / destroy / aktif
-        Route::patch('grup-soal/{grupSoal}/aktif', [GrupSoalController::class, 'toggleAktif'])->name('grup-soal.aktif');
-        Route::resource('grup-soal', GrupSoalController::class)
-            ->parameters(['grup-soal' => 'grupSoal']);
+        // Semua soal ditangani SoalController: paket soal, soal di dalam paket, dan import Excel.
+        Route::controller(SoalController::class)->group(function () {
+            // Paket soal (GrupSoal) -> admin.grup-soal.*  (create HARUS di atas {grupSoal})
+            Route::get('grup-soal', 'index')->name('grup-soal.index');
+            Route::get('grup-soal/create', 'create')->name('grup-soal.create');
+            Route::post('grup-soal', 'store')->name('grup-soal.store');
+            Route::get('grup-soal/{grupSoal}', 'show')->name('grup-soal.show');
+            Route::get('grup-soal/{grupSoal}/edit', 'edit')->name('grup-soal.edit');
+            Route::put('grup-soal/{grupSoal}', 'update')->name('grup-soal.update');
+            Route::delete('grup-soal/{grupSoal}', 'destroy')->name('grup-soal.destroy');
+            Route::patch('grup-soal/{grupSoal}/aktif', 'toggleAktif')->name('grup-soal.aktif');
 
-        // Soal pilihan ganda di dalam paket. Shallow: create/store butuh paket, edit/update/destroy cukup id soal.
-        //   admin.grup-soal.soal.create / store, admin.soal.edit / update / destroy
-        // Daftar & detail soal tampil di halaman detail paket, jadi index/show tidak dipakai.
-        Route::patch('soal/{soal}/status', [SoalController::class, 'ubahStatus'])->name('soal.status');
-        Route::resource('grup-soal.soal', SoalController::class)
-            ->shallow()
-            ->except(['index', 'show'])
-            ->parameters(['grup-soal' => 'grupSoal', 'soal' => 'soal']);
+            // Import soal dari Excel -> admin.soal.import / import.store / template
+            Route::get('soal/import', 'import')->name('soal.import');
+            Route::post('soal/import', 'importStore')->name('soal.import.store');
+            Route::get('soal/template', 'template')->name('soal.template');
+
+            // Soal pilihan ganda di dalam paket
+            Route::get('grup-soal/{grupSoal}/soal/create', 'createSoal')->name('grup-soal.soal.create');
+            Route::post('grup-soal/{grupSoal}/soal', 'storeSoal')->name('grup-soal.soal.store');
+            Route::get('soal/{soal}/edit', 'editSoal')->name('soal.edit');
+            Route::put('soal/{soal}', 'updateSoal')->name('soal.update');
+            Route::delete('soal/{soal}', 'destroySoal')->name('soal.destroy');
+            Route::patch('soal/{soal}/status', 'ubahStatus')->name('soal.status');
+        });
 
         // Mengerjakan soal dari paket (GrupSoal) -> admin.kerjakan.*
         //   index / detail / mulai          : daftar paket, halaman paket, mulai percobaan

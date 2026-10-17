@@ -96,6 +96,7 @@
                 </div>
             </div>
             <div class="ph-aksi">
+                <a href="{{ route('admin.soal.import') }}" class="btn-polos"><i class="fas fa-file-excel me-2"></i>Import Excel</a>
                 <a href="{{ route('admin.grup-soal.create') }}" class="btn-utama"><i class="fas fa-plus me-2"></i>Buat Paket</a>
             </div>
         </div>

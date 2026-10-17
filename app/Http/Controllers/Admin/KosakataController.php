@@ -26,35 +26,51 @@ class KosakataController extends Controller
 
     /* ================================================================ INDEX */
 
-    public function index(Request $request): View
+    public function index(Request $request): View|string
     {
         $kosakatas = Kosakata::query()
-            ->with(['kategori', 'levelTocfl'])
+            ->with(['kategori:id,nama', 'levelTocfl:id,nama,tingkat'])
             ->withCount(['contohKalimats', 'soals'])
             ->cari($request->input('search'))
             ->when($request->filled('kategori_id'), fn ($q) => $this->filterKolom($q, 'kategori_id', $request->input('kategori_id')))
             ->when($request->filled('level_tocfl_id'), fn ($q) => $this->filterKolom($q, 'level_tocfl_id', $request->input('level_tocfl_id')))
             ->when($request->filled('jenis_kata'), fn ($q) => $this->filterKolom($q, 'jenis_kata', $request->input('jenis_kata')))
             ->when($request->filled('lengkap'), fn ($q) => $this->filterKelengkapan($q, $request->input('lengkap')))
-            ->urut()
+            ->urut() // Level 1 -> 6 (tanpa level di akhir), lalu urutan, lalu id
             ->paginate(self::PER_HALAMAN)
             ->withQueryString();
 
-        $total        = Kosakata::count();
-        $denganContoh = Kosakata::has('contohKalimats')->count();
+        // Request AJAX (cari / filter / pagination): kirim potongan tabel saja
+        // (@fragment('tabel') di index.blade.php). Statistik & dropdown tidak dihitung.
+        if ($request->ajax()) {
+            return view('pages.kosakata.index', [
+                'kosakatas' => $kosakatas,
+                'stats'     => ['total' => 0, 'dengan_contoh' => 0, 'tanpa_contoh' => 0, 'tanpa_arti' => 0],
+                'kategoris' => collect(),
+                'levels'    => collect(),
+                'jenisKata' => [],
+            ])->fragment('tabel');
+        }
+
+        // Statistik: satu query (sebelumnya empat query count terpisah).
+        $s = Kosakata::query()->selectRaw("
+            COUNT(*) AS total,
+            COALESCE(SUM(EXISTS(SELECT 1 FROM contoh_kalimats c WHERE c.kosakata_id = kosakatas.id)), 0) AS dengan_contoh,
+            COALESCE(SUM(arti_indonesia IS NULL OR arti_indonesia = ''), 0) AS tanpa_arti
+        ")->first();
 
         $stats = [
-            'total'         => $total,
-            'dengan_contoh' => $denganContoh,
-            'tanpa_contoh'  => $total - $denganContoh,
-            'tanpa_arti'    => $this->tanpaArti(Kosakata::query())->count(),
+            'total'         => (int) $s->total,
+            'dengan_contoh' => (int) $s->dengan_contoh,
+            'tanpa_contoh'  => (int) $s->total - (int) $s->dengan_contoh,
+            'tanpa_arti'    => (int) $s->tanpa_arti,
         ];
 
         return view('pages.kosakata.index', [
             'kosakatas' => $kosakatas,
             'stats'     => $stats,
-            'kategoris' => Kategori::orderBy('nama')->get(),
-            'levels'    => LevelTocfl::orderBy('tingkat')->get(),
+            'kategoris' => Kategori::orderBy('nama')->get(['id', 'nama']),
+            'levels'    => LevelTocfl::orderBy('tingkat')->get(['id', 'nama', 'tingkat']),
             'jenisKata' => Kosakata::JENIS_KATA,
         ]);
     }

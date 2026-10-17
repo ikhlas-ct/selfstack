@@ -9,6 +9,7 @@ use App\Models\JawabanUjian;
 use App\Models\LaporanSoal;
 use App\Models\LevelTocfl;
 use App\Models\Soal;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -22,9 +23,9 @@ use Illuminate\View\View;
  * Alur: index (daftar paket) -> detail -> mulai (buat HasilUjian) -> kerjakan (satu soal per halaman)
  *       -> jawab (simpan + pindah soal) -> selesai (hitung skor) -> hasil (pembahasan + lapor soal).
  *
- * Perbedaan jenis paket:
- *  - ujian   : tanpa umpan balik sampai selesai, jawaban boleh diubah, navigasi bebas.
- *  - latihan : jawaban langsung diperiksa dan dikunci, penjelasan tampil saat itu juga.
+ * Latihan maupun ujian dikerjakan dengan cara yang sama: tidak ada umpan balik selama mengerjakan,
+ * jawaban boleh diubah, navigasi bebas. Benar/salah dan pembahasan baru muncul di halaman hasil.
+ * Jenis paket hanya memengaruhi label (dan batas waktu, kalau paketnya punya durasi).
  */
 class KerjakanSoalController extends Controller
 {
@@ -79,6 +80,15 @@ class KerjakanSoalController extends Controller
 
         $berjalan = HasilUjian::berjalan()->whereIn('grup_soal_id', $ids)->get()->keyBy('grup_soal_id');
 
+        // Jumlah soal yang sudah dijawab pada percobaan berjalan, untuk bar progres di kartu paket.
+        $jumlahDijawab = JawabanUjian::whereIn('hasil_ujian_id', $berjalan->pluck('id'))
+            ->whereNotNull('jawaban_dipilih')
+            ->selectRaw('hasil_ujian_id, COUNT(*) AS jumlah')
+            ->groupBy('hasil_ujian_id')
+            ->pluck('jumlah', 'hasil_ujian_id');
+
+        $dijawab = $berjalan->map(fn (HasilUjian $h) => (int) ($jumlahDijawab[$h->id] ?? 0));
+
         $ringkasan = [
             'paket'    => $grups->total(),
             'selesai'  => HasilUjian::selesai()->count(),
@@ -89,6 +99,7 @@ class KerjakanSoalController extends Controller
             'grups'     => $grups,
             'statistik' => $statistik,
             'berjalan'  => $berjalan,
+            'dijawab'   => $dijawab,
             'ringkasan' => $ringkasan,
             'levels'    => LevelTocfl::orderBy('tingkat')->get(['id', 'nama']),
             'cari'      => $cari,
@@ -197,15 +208,15 @@ class KerjakanSoalController extends Controller
         $jawaban = $hasilUjian->jawabanUjians()->get()->keyBy('soal_id');
 
         // Status tiap nomor untuk kotak navigasi.
-        $nav = $ids->map(function ($id, $i) use ($jawaban, $latihan) {
-            $j      = $jawaban[$id] ?? null;
-            $status = 'kosong';
+        // Selama mengerjakan: sudah dijawab atau belum (tanpa benar/salah), plus tanda ragu-ragu.
+        $nav = $ids->map(function ($id, $i) use ($jawaban) {
+            $j = $jawaban[$id] ?? null;
 
-            if ($j && $j->jawaban_dipilih !== null) {
-                $status = $latihan ? ($j->benar ? 'benar' : 'salah') : 'terjawab';
-            }
-
-            return ['no' => $i + 1, 'status' => $status];
+            return [
+                'no'     => $i + 1,
+                'status' => $j && $j->jawaban_dipilih !== null ? 'terjawab' : 'kosong',
+                'ragu'   => (bool) ($j?->ragu),
+            ];
         });
 
         $jawabanSaatIni = $jawaban[$soal->id] ?? null;
@@ -218,10 +229,10 @@ class KerjakanSoalController extends Controller
             'total'          => $ids->count(),
             'nav'            => $nav,
             'belumDijawab'   => $nav->where('status', 'kosong')->count(),
+            'ragu'           => (bool) ($jawabanSaatIni?->ragu),
+            'jumlahRagu'     => $nav->where('ragu', true)->count(),
             'jawabanSaatIni' => $jawabanSaatIni,
-            'latihan'        => $latihan,
-            // Pada latihan, soal yang sudah dijawab dikunci dan umpan baliknya tampil.
-            'terkunci'       => $latihan && $jawabanSaatIni?->jawaban_dipilih !== null,
+            'latihan'        => $latihan, // hanya untuk label
             'sisaDetik'      => $this->sisaDetik($hasilUjian),
         ]);
     }
@@ -230,22 +241,25 @@ class KerjakanSoalController extends Controller
      * Simpan jawaban soal yang sedang tampil, lalu pindah.
      * Field "ke": nomor soal tujuan, atau "selesai" untuk mengakhiri percobaan.
      */
-    public function jawab(Request $request, HasilUjian $hasilUjian): RedirectResponse
+    public function jawab(Request $request, HasilUjian $hasilUjian): RedirectResponse|JsonResponse
     {
         if ($alih = $this->periksaStatus($hasilUjian)) {
-            return $alih;
+            // Flash message sudah tersimpan di session oleh periksaStatus().
+            return $request->expectsJson()
+                ? response()->json(['halaman' => 'hasil', 'redirect' => $alih->getTargetUrl()])
+                : $alih;
         }
 
         $data = $request->validate([
             'soal_id'  => ['required', 'integer'],
             'no'       => ['nullable', 'integer', 'min:1'],
             'jawaban'  => ['nullable', Rule::in(['A', 'B', 'C', 'D'])],
+            'ragu'     => ['nullable', 'boolean'],
             'waktu_ms' => ['nullable', 'integer', 'min:0'],
             'ke'       => ['required', 'regex:/^(\d+|selesai)$/'],
         ]);
 
-        $grup    = $hasilUjian->grupSoal;
-        $latihan = $grup->jenis === GrupSoal::JENIS_LATIHAN;
+        $grup = $hasilUjian->grupSoal;
 
         $soal = Soal::dapatDikerjakan()
             ->where('grup_soal_id', $grup->id)
@@ -254,27 +268,47 @@ class KerjakanSoalController extends Controller
         abort_if($soal === null, 404);
 
         $huruf = $data['jawaban'] ?? null;
+        $ragu  = $request->boolean('ragu');
 
-        $sudah    = JawabanUjian::where('hasil_ujian_id', $hasilUjian->id)->where('soal_id', $soal->id)->first();
-        $terkunci = $latihan && $sudah?->jawaban_dipilih !== null;
+        $sudah = JawabanUjian::where('hasil_ujian_id', $hasilUjian->id)->where('soal_id', $soal->id)->first();
 
-        if ($huruf !== null && ! $terkunci) {
-            JawabanUjian::updateOrCreate(
-                ['hasil_ujian_id' => $hasilUjian->id, 'soal_id' => $soal->id],
-                [
+        // Simpan kalau ada pilihan baru, atau kalau tanda ragu-ragu berubah (soal belum dijawab pun boleh ditandai).
+        $perluSimpan = $huruf !== null || ($sudah ? (bool) $sudah->ragu !== $ragu : $ragu);
+
+        if ($perluSimpan) {
+            $rekam = $sudah ?? new JawabanUjian(['hasil_ujian_id' => $hasilUjian->id, 'soal_id' => $soal->id]);
+
+            $nilai = ['ragu' => $ragu];
+
+            if ($huruf !== null) {
+                // Jawaban boleh diubah kapan saja sebelum percobaan diakhiri.
+                $nilai += [
                     'jawaban_dipilih' => $huruf,
                     'benar'           => $soal->periksaJawaban($huruf),
                     'waktu_jawab_ms'  => min((int) ($data['waktu_ms'] ?? 0), 3_600_000),
                     'dijawab_pada'    => now(),
-                ]
-            );
+                ];
+            } elseif (! $sudah) {
+                // Hanya ditandai ragu-ragu, belum ada jawaban.
+                $nilai += ['jawaban_dipilih' => null, 'benar' => false];
+            }
 
-            // TODO (SM-2): catat RiwayatReview (sumber = SOAL, jenis_item = $soal->jenisItemReview())
-            // dan perbarui progres_* di sini, memakai service penjadwalan yang sama dengan flashcard.
+            // forceFill: kolom "ragu" tidak perlu didaftarkan di $fillable model.
+            $rekam->forceFill($nilai)->save();
+
+            // TODO (SM-2): karena jawaban boleh diubah, catat RiwayatReview (sumber = SOAL,
+            // jenis_item = $soal->jenisItemReview()) dan perbarui progres_* saat percobaan ditutup
+            // (tutup()), bukan di sini, memakai service penjadwalan yang sama dengan flashcard.
         }
 
         if ($data['ke'] === 'selesai') {
             $this->tutup($hasilUjian);
+
+            if ($request->expectsJson()) {
+                session()->flash('success', 'Selesai dikerjakan.');
+
+                return response()->json(['halaman' => 'hasil', 'redirect' => route('admin.kerjakan.hasil', $hasilUjian)]);
+            }
 
             return redirect()->route('admin.kerjakan.hasil', $hasilUjian)->with('success', 'Selesai dikerjakan.');
         }
@@ -282,12 +316,11 @@ class KerjakanSoalController extends Controller
         $total = $grup->soals()->dapatDikerjakan()->count();
         $ke    = max(1, min($total, (int) $data['ke']));
 
-        // Pada latihan, "Periksa jawaban" (tetap di nomor yang sama) harus ada jawabannya.
-        if ($latihan && ! $terkunci && $huruf === null && $ke === (int) ($data['no'] ?? 0)) {
-            return back()->with('error', 'Pilih salah satu jawaban dulu.');
-        }
+        $url = route('admin.kerjakan.soal', [$hasilUjian, 'no' => $ke]);
 
-        return redirect()->route('admin.kerjakan.soal', [$hasilUjian, 'no' => $ke]);
+        return $request->expectsJson()
+            ? response()->json(['halaman' => 'soal', 'redirect' => $url])
+            : redirect()->to($url);
     }
 
     /** Akhiri percobaan tanpa menyimpan jawaban baru (dipakai halaman detail paket). */
@@ -329,6 +362,7 @@ class KerjakanSoalController extends Controller
             'benar'    => $benar,
             'dilewati' => $dilewati,
             'salah'    => max(0, $jawaban->count() - $benar - $dilewati),
+            'ragu'     => $jawaban->where('ragu', true)->count(),
         ];
 
         $perBagian = $soals->groupBy('bagian')->map(fn ($g) => [
@@ -336,7 +370,7 @@ class KerjakanSoalController extends Controller
             'benar' => $g->filter(fn ($s) => $jawaban[$s->id]->benar)->count(),
         ]);
 
-        $tampil = in_array($request->query('tampil'), ['salah', 'dilewati'], true)
+        $tampil = in_array($request->query('tampil'), ['salah', 'dilewati', 'ragu'], true)
             ? $request->query('tampil')
             : 'semua';
 
@@ -346,6 +380,7 @@ class KerjakanSoalController extends Controller
             return match ($tampil) {
                 'salah'    => ! $j->benar && $j->jawaban_dipilih !== null,
                 'dilewati' => $j->jawaban_dipilih === null,
+                'ragu'     => (bool) $j->ragu,
                 default    => true,
             };
         });

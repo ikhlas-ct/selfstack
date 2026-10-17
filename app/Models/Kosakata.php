@@ -117,26 +117,42 @@ class Kosakata extends Model
 
     // ---------------------------------------------------------------- scope
 
-    /** Pencarian di hanzi, pinyin, dan arti. */
+    /**
+     * Pencarian di hanzi, pinyin, dan arti.
+     * Pinyin dicari tanpa peduli spasi dan tanda nada: "xuesheng", "xue sheng",
+     * dan "xuéshēng" semuanya menemukan kata yang pinyin-nya "xué shēng".
+     */
     public function scopeCari(Builder $query, ?string $kata): Builder
     {
         if ($kata === null || trim($kata) === '') {
             return $query;
         }
 
-        $kata = trim($kata);
+        $kata       = trim($kata);
+        $tanpaSpasi = str_replace([' ', "'", '’'], '', $kata);
 
-        return $query->where(function (Builder $q) use ($kata) {
+        return $query->where(function (Builder $q) use ($kata, $tanpaSpasi) {
             $q->where('hanzi', 'like', "%{$kata}%")
-              ->orWhere('pinyin', 'like', "%{$kata}%")
               ->orWhere('arti_indonesia', 'like', "%{$kata}%")
-              ->orWhere('arti_singkat', 'like', "%{$kata}%");
+              ->orWhere('arti_singkat', 'like', "%{$kata}%")
+              ->orWhere('pinyin', 'like', "%{$kata}%")
+              // pinyin tanpa spasi & apostrof; collation _ci = abaikan huruf besar/kecil dan aksen (nada)
+              ->orWhereRaw(
+                  "REPLACE(REPLACE(REPLACE(pinyin, ' ', ''), '''', ''), '’', '') COLLATE utf8mb4_unicode_ci LIKE ?",
+                  ["%{$tanpaSpasi}%"]
+              );
         });
     }
 
-    /** Urutan tampil: level TOCFL dulu, lalu kolom urutan. */
+    /**
+     * Urutan tampil: Level 1 -> 6 (berdasarkan kolom `tingkat`, BUKAN id level),
+     * kata tanpa level di paling akhir, lalu kolom urutan, lalu id.
+     */
     public function scopeUrut(Builder $query): Builder
     {
-        return $query->orderBy('level_tocfl_id')->orderBy('urutan')->orderBy('id');
+        return $query
+            ->orderByRaw('COALESCE((SELECT tingkat FROM level_tocfls WHERE level_tocfls.id = kosakatas.level_tocfl_id), 999)')
+            ->orderBy('urutan')
+            ->orderBy('id');
     }
 }

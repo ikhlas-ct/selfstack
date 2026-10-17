@@ -182,12 +182,12 @@
 
                 {{-- Filter --}}
                 <div class="filter-section">
-                    <form method="GET" action="{{ route('admin.kosakata.index') }}">
+                    <form id="form-filter" method="GET" action="{{ route('admin.kosakata.index') }}">
                         <div class="row g-2 align-items-end">
                             <div class="col-12 col-md-3">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                    <input type="text" name="search" class="form-control"
+                                    <input type="text" name="search" id="input-search" class="form-control" autocomplete="off"
                                         placeholder="Cari hanzi / pinyin / arti..." value="{{ request('search') }}">
                                 </div>
                             </div>
@@ -251,6 +251,9 @@
                     </form>
                 </div>
 
+                {{-- Tabel + pagination (di-refresh lewat AJAX) --}}
+                <div id="tabel-wrap">
+                    @fragment('tabel')
                 {{-- Table --}}
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -379,6 +382,8 @@
                         {{ $kosakatas->links() }}
                     </div>
                 @endif
+                    @endfragment
+                </div>
 
             </div>{{-- end .card --}}
 
@@ -388,41 +393,101 @@
 
 @section('scripts')
     <script>
-        document.querySelectorAll('.btn-hapus[data-id]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const hanzi = this.dataset.hanzi;
-                const jumlah = parseInt(this.dataset.jumlah || 0);
-                const soal = parseInt(this.dataset.soal || 0);
+        (function () {
+            const form = document.getElementById('form-filter');
+            const wrap = document.getElementById('tabel-wrap');
+            const search = document.getElementById('input-search');
+            const baseUrl = form.getAttribute('action');
+            let timer = null;
+            let controller = null;
+
+            // Ambil tabel baru dari server (hanya potongan tabel, bukan seluruh halaman).
+            function muat(url, push = true) {
+                if (controller) controller.abort();          // batalkan request lama yang belum selesai
+                controller = new AbortController();
+                wrap.style.opacity = '.5';
+
+                fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    signal: controller.signal,
+                })
+                    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+                    .then(html => {
+                        wrap.innerHTML = html;
+                        wrap.style.opacity = '1';
+                        if (push) history.pushState(null, '', url);
+                    })
+                    .catch(e => {
+                        if (e.name !== 'AbortError') wrap.style.opacity = '1';
+                    });
+            }
+
+            function urlFilter(halaman) {
+                const params = new URLSearchParams(new FormData(form));
+                for (const [k, v] of [...params]) if (v === '') params.delete(k);
+                if (halaman) params.set('page', halaman);
+                const q = params.toString();
+                return q ? baseUrl + '?' + q : baseUrl;
+            }
+
+            // Ketik -> tunggu 300ms setelah berhenti mengetik, baru cari.
+            search.addEventListener('input', () => {
+                clearTimeout(timer);
+                timer = setTimeout(() => muat(urlFilter()), 300);
+            });
+
+            // Ganti dropdown -> langsung filter.
+            form.querySelectorAll('select').forEach(el =>
+                el.addEventListener('change', () => muat(urlFilter())));
+
+            // Tombol Filter / Enter tidak reload halaman.
+            form.addEventListener('submit', e => { e.preventDefault(); clearTimeout(timer); muat(urlFilter()); });
+
+            // Tombol reset.
+            form.querySelector('a[title="Reset filter"]').addEventListener('click', e => {
+                e.preventDefault();
+                form.reset();
+                form.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+                search.value = '';
+                muat(baseUrl);
+            });
+
+            // Pagination (tabel diganti lewat AJAX, jadi pakai event delegation).
+            wrap.addEventListener('click', e => {
+                const a = e.target.closest('.pagination a');
+                if (!a) return;
+                e.preventDefault();
+                muat(a.href);
+                window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
+            });
+
+            // Tombol back/forward browser.
+            window.addEventListener('popstate', () => muat(location.href, false));
+
+            // Hapus (delegation, karena baris tabel diganti-ganti).
+            wrap.addEventListener('click', e => {
+                const btn = e.target.closest('.btn-hapus[data-id]');
+                if (!btn) return;
+
+                const id = btn.dataset.id;
+                const hanzi = btn.dataset.hanzi;
+                const jumlah = parseInt(btn.dataset.jumlah || 0);
+                const soal = parseInt(btn.dataset.soal || 0);
 
                 let teks = `Kosakata "${hanzi}" akan dihapus permanen.`;
-                if (jumlah > 0) {
-                    teks += ` ${jumlah} contoh kalimatnya ikut terhapus.`;
-                }
+                if (jumlah > 0) teks += ` ${jumlah} contoh kalimatnya ikut terhapus.`;
                 teks += ' Pecahan karakter, relasi, keanggotaan grup, dan progres hafalan kata ini juga ikut terhapus.';
-                if (soal > 0) {
-                    teks += ` ${soal} soal yang memakai kata ini tidak ikut terhapus, tapi diberi status ditolak (disembunyikan dari latihan dan ujian).`;
-                }
+                if (soal > 0) teks += ` ${soal} soal yang memakai kata ini tidak ikut terhapus, tapi diberi status ditolak (disembunyikan dari latihan dan ujian).`;
                 teks += ' Riwayat review tetap tersimpan.';
 
                 swal({
                     title: 'Hapus Kosakata?',
                     text: teks,
                     icon: 'warning',
-                    buttons: {
-                        cancel: 'Batal',
-                        confirm: {
-                            text: 'Ya, Hapus!',
-                            className: 'btn-danger'
-                        }
-                    },
+                    buttons: { cancel: 'Batal', confirm: { text: 'Ya, Hapus!', className: 'btn-danger' } },
                     dangerMode: true,
-                }).then(confirmed => {
-                    if (confirmed) {
-                        document.getElementById('form-hapus-' + id).submit();
-                    }
-                });
+                }).then(ok => { if (ok) document.getElementById('form-hapus-' + id).submit(); });
             });
-        });
+        })();
     </script>
 @endsection

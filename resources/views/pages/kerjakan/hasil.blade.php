@@ -199,6 +199,50 @@
     .tts-bar .form-select { flex: 1 1 220px; max-width: 380px; font-size: .78rem; padding: 5px 30px 5px 10px; }
     .tts-info { font-size: .74rem; color: var(--gk-faint); }
 
+/* ===== POLES HALAMAN HASIL ===== */
+    .skor-card { gap: 28px; }
+    .skor-ring { width: 150px; height: 150px; }
+    .skor-ring > div { width: 118px; height: 118px; }
+    .skor-ring .angka { font-size: 2.3rem; }
+    .skor-judul { font-size: 1.35rem; letter-spacing: -.3px; }
+    .stat-row .stat-box:nth-child(1) .stat-num { color: #15803d; }
+    .stat-row .stat-box:nth-child(2) .stat-num { color: #dc2626; }
+    .stat-row .stat-box:nth-child(3) .stat-num { color: var(--gk-muted); }
+
+    .peta-jawab { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 6px; }
+    .peta-no { height: 38px; border-radius: 10px; border: 1.5px solid var(--gk-line); background: #fff; font-size: .78rem; font-weight: 700; color: var(--gk-muted); display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+    .peta-no:hover { filter: brightness(.96); }
+    .peta-no.benar { background: #dcfce7; border-color: #86efac; color: #15803d; }
+    .peta-no.salah { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
+    .peta-no.lewat { background: #f1f5f9; color: var(--gk-muted); }
+    .peta-no:focus-visible { outline: 3px solid rgba(26,115,232,.35); outline-offset: 2px; }
+    .peta-legend { display: flex; gap: 14px; margin: 10px 0 18px; font-size: .72rem; color: var(--gk-muted); }
+    .peta-legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; border: 1.5px solid var(--gk-line); background: #f1f5f9; }
+    .peta-legend .l-benar::before { background: #dcfce7; border-color: #86efac; }
+    .peta-legend .l-salah::before { background: #fee2e2; border-color: #fca5a5; }
+
+    .review-item { border-left: 5px solid var(--gk-line); }
+    .review-item.r-benar { border-left-color: #22c55e; }
+    .review-item.r-salah { border-left-color: #ef4444; }
+    .review-item.r-lewat { border-left-color: #cbd5e1; }
+    .review-item .soal-tanya { font-size: 1.5rem !important; }
+    .review-item .soal-paragraf { font-size: 1.2rem !important; }
+    .review-item .opsi-pilih { font-size: 1.3rem !important; padding: 9px 14px; align-items: center; }
+    .review-item .opsi-pilih .tanda { margin-left: 0; margin-top: 0; }
+    .tag-grup { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .tag-grup .kamu-tag { margin-left: 0; }
+    .kunci-tag { font-family: 'Plus Jakarta Sans', sans-serif; font-size: .68rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: #16a34a; color: #fff; }
+    .catatan-lewat { font-size: .78rem; color: var(--gk-muted); background: #f1f5f9; border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; }
+    .jelas-box { border-left: 3px solid #fbbf24; background: #fffbeb; color: #78350f; }
+
+/* ===== RAGU-RAGU (kuning) ===== */
+    .badge-ragu { background: #fef3c7; color: #92400e; }
+    .stat-row .stat-box:nth-child(4) .stat-num { color: #b45309; }
+    .peta-no { position: relative; }
+    .peta-no.ragu { box-shadow: 0 0 0 2px #fbbf24; }
+    .peta-no.ragu::after { content: ''; position: absolute; top: 3px; right: 3px; width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; }
+    .peta-legend .l-ragu::before { background: #fef3c7; border-color: #fbbf24; }
+
 @media (prefers-reduced-motion: reduce) {
         .btn-primary, .grup-card, .form-control, .opsi-pilih { transition: none; }
         .btn-primary:hover { transform: none; }
@@ -332,6 +376,10 @@
                     <div class="stat-cap">Dilewati</div>
                 </div>
                 <div class="stat-box">
+                    <div class="stat-num">{{ $ringkas['ragu'] }}</div>
+                    <div class="stat-cap">Ragu-ragu</div>
+                </div>
+                <div class="stat-box">
                     <div class="stat-num" style="font-size:1.15rem; padding-top:6px;">{{ $durasi ?? '-' }}</div>
                     <div class="stat-cap">Lama mengerjakan</div>
                 </div>
@@ -345,10 +393,25 @@
                         <span class="badge badge-pilih">{{ $daftar->count() }} soal</span>
                     </div>
 
+                    <div class="peta-jawab" aria-label="Ringkasan tiap nomor soal">
+                        @foreach ($nomor as $soalId => $noSoal)
+                            @php
+                                $jj = $jawaban[$soalId];
+                                $st = $jj->jawaban_dipilih === null ? 'lewat' : ($jj->benar ? 'benar' : 'salah');
+                            @endphp
+                            <a href="{{ route('admin.kerjakan.hasil', $hasil) }}#soal-{{ $soalId }}" class="peta-no {{ $st }} {{ $jj->ragu ? 'ragu' : '' }}"
+                               title="Soal {{ $noSoal }}: {{ $st === 'lewat' ? 'dilewati' : $st }}{{ $jj->ragu ? ', ragu-ragu' : '' }}">{{ $noSoal }}</a>
+                        @endforeach
+                    </div>
+                    <div class="peta-legend">
+                        <span class="l-benar">Benar</span><span class="l-salah">Salah</span><span>Dilewati</span><span class="l-ragu">Ditandai ragu-ragu</span>
+                    </div>
+
                     <div class="tab-filter" role="navigation" aria-label="Filter pembahasan">
                         <a href="{{ route('admin.kerjakan.hasil', $hasil) }}" class="{{ $tampil === 'semua' ? 'aktif' : '' }}">Semua ({{ $ringkas['benar'] + $ringkas['salah'] + $ringkas['dilewati'] }})</a>
                         <a href="{{ route('admin.kerjakan.hasil', [$hasil, 'tampil' => 'salah']) }}" class="{{ $tampil === 'salah' ? 'aktif' : '' }}">Salah ({{ $ringkas['salah'] }})</a>
                         <a href="{{ route('admin.kerjakan.hasil', [$hasil, 'tampil' => 'dilewati']) }}" class="{{ $tampil === 'dilewati' ? 'aktif' : '' }}">Dilewati ({{ $ringkas['dilewati'] }})</a>
+                        <a href="{{ route('admin.kerjakan.hasil', [$hasil, 'tampil' => 'ragu']) }}" class="{{ $tampil === 'ragu' ? 'aktif' : '' }}">Ragu-ragu ({{ $ringkas['ragu'] }})</a>
                     </div>
 
                     @forelse ($daftar as $soal)
@@ -358,7 +421,7 @@
                             $dilapor  = in_array($soal->id, $sudahDilaporkan, true);
                         @endphp
 
-                        <div class="review-item" id="soal-{{ $soal->id }}">
+                        <div class="review-item {{ $dilewati ? 'r-lewat' : ($j->benar ? 'r-benar' : 'r-salah') }}" id="soal-{{ $soal->id }}">
                             <div class="soal-head">
                                 <span class="soal-no">{{ $nomor[$soal->id] }}</span>
                                 @php $ib = $infoBagian($soal->bagian); @endphp
@@ -368,6 +431,9 @@
                                     <span class="text-muted" style="font-size:.76rem;">{{ $soal->kosakata->pinyin }}</span>
                                 @endif
                                 <span class="ms-auto">
+                                    @if ($j->ragu)
+                                        <span class="badge badge-ragu me-1"><i class="fas fa-flag me-1"></i>Ragu-ragu</span>
+                                    @endif
                                     @if ($dilewati)
                                         <span class="badge badge-lewat"><i class="fas fa-forward me-1"></i>Dilewati</span>
                                     @elseif ($j->benar)
@@ -417,6 +483,10 @@
 
                             <div class="soal-tanya">{!! nl2br(e($soal->pertanyaan)) !!}</div>
 
+                            @if ($dilewati)
+                                <div class="catatan-lewat"><i class="fas fa-forward me-1"></i>Kamu tidak menjawab soal ini, jadi dihitung salah.</div>
+                            @endif
+
                             <div class="opsi-list">
                                 @foreach ($soal->pilihan as $huruf => $teks)
                                     @php
@@ -430,8 +500,15 @@
                                     <div class="opsi-pilih terkunci {{ $kelas }}">
                                         <span class="huruf">{{ $huruf }}</span>
                                         <span>{{ $teks }}</span>
-                                        @if ($huruf === $j->jawaban_dipilih)
-                                            <span class="kamu-tag">Jawabanmu</span>
+                                        @if ($huruf === $j->jawaban_dipilih || $kelas === 'benar')
+                                            <span class="tag-grup">
+                                                @if ($huruf === $j->jawaban_dipilih)
+                                                    <span class="kamu-tag">Jawabanmu</span>
+                                                @endif
+                                                @if ($kelas === 'benar')
+                                                    <span class="kunci-tag">Kunci jawaban</span>
+                                                @endif
+                                            </span>
                                         @endif
                                         @if ($kelas === 'benar')
                                             <i class="fas fa-check-circle tanda" title="Jawaban benar"></i>
