@@ -44,6 +44,38 @@
                 </a>
             </li>
 
+            <!-- Progres Hafalan -->
+            <li class="nav-item {{ request()->routeIs('admin.hafalan*') ? 'active' : '' }}">
+                <a href="{{ route('admin.hafalan.index') }}">
+                    <i class="fas fa-chart-pie"></i>
+                    <p>Progres Hafalan</p>
+                </a>
+            </li>
+
+            <!-- Flashcard Hafalan -->
+            <li class="nav-item {{ request()->routeIs('admin.flashcard*') ? 'active' : '' }}">
+                <a href="{{ route('admin.flashcard.index') }}">
+                    <i class="fas fa-layer-group"></i>
+                    <p>Flashcard</p>
+                </a>
+            </li>
+
+            <!-- Paket Soal (aktif juga di halaman detail paket, tambah/ubah paket, dan tambah/ubah soal) -->
+            <li class="nav-item {{ request()->routeIs('admin.grup-soal*', 'admin.soal*') ? 'active' : '' }}">
+                <a href="{{ route('admin.grup-soal.index') }}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <p>Paket Soal</p>
+                </a>
+            </li>
+
+            <!-- Kerjakan Soal (aktif juga di halaman paket, mengerjakan soal, dan hasil) -->
+            <li class="nav-item {{ request()->routeIs('admin.kerjakan*') ? 'active' : '' }}">
+                <a href="{{ route('admin.kerjakan.index') }}">
+                    <i class="fas fa-pencil-alt"></i>
+                    <p>Kerjakan Soal</p>
+                </a>
+            </li>
+
             {{-- Menu berikutnya ditambah di sini setelah route-nya dibuat. --}}
 
             <!-- Logout -->

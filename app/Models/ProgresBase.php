@@ -22,6 +22,13 @@ abstract class ProgresBase extends Model
         self::STATUS_INGAT_SEPENUHNYA,
     ];
 
+    /** Label tampilan untuk tiap status. */
+    public const LABEL = [
+        self::STATUS_BERIKUTNYA       => 'Berikutnya',
+        self::STATUS_LUPA_DAN_INGAT   => 'Lupa & Ingat',
+        self::STATUS_INGAT_SEPENUHNYA => 'Ingat Sepenuhnya',
+    ];
+
     protected $guarded = ['id'];
 
     protected $casts = [
@@ -36,6 +43,12 @@ abstract class ProgresBase extends Model
         'ditandai'                => 'boolean',
         'ditangguhkan'            => 'boolean',
     ];
+
+    /** Label status untuk ditampilkan ($progres->status_label). */
+    public function getStatusLabelAttribute(): string
+    {
+        return self::LABEL[$this->status] ?? (string) $this->status;
+    }
 
     /** Yang tidak ditangguhkan. */
     public function scopeAktif(Builder $query): Builder
