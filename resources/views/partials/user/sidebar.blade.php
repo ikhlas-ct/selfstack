@@ -40,12 +40,32 @@
                 </a>
             </li>
 
+            <!-- ================= DATA MASTER ================= -->
+            <li class="nav-section">
+                <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                <h4 class="text-section">Data Master</h4>
+            </li>
+
             <!-- Kosakata (aktif juga di halaman create, edit, show, dan import) -->
             <li class="nav-item {{ request()->routeIs('admin.kosakata*') ? 'active' : '' }}">
                 <a href="{{ route('admin.kosakata.index') }}">
                     <i class="fas fa-language"></i>
                     <p>Kosakata</p>
                 </a>
+            </li>
+
+            <!-- Paket Soal (aktif juga di halaman detail paket, tambah/ubah paket, dan tambah/ubah soal) -->
+            <li class="nav-item {{ request()->routeIs('admin.grup-soal*', 'admin.soal*') ? 'active' : '' }}">
+                <a href="{{ route('admin.grup-soal.index') }}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <p>Paket Soal</p>
+                </a>
+            </li>
+
+            <!-- ================= PROSES & PROGRES ================= -->
+            <li class="nav-section">
+                <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                <h4 class="text-section">Proses &amp; Progres</h4>
             </li>
 
             <!-- Progres Hafalan -->
@@ -64,14 +84,6 @@
                 </a>
             </li>
 
-            <!-- Paket Soal (aktif juga di halaman detail paket, tambah/ubah paket, dan tambah/ubah soal) -->
-            <li class="nav-item {{ request()->routeIs('admin.grup-soal*', 'admin.soal*') ? 'active' : '' }}">
-                <a href="{{ route('admin.grup-soal.index') }}">
-                    <i class="fas fa-clipboard-list"></i>
-                    <p>Paket Soal</p>
-                </a>
-            </li>
-
             <!-- Kerjakan Soal (aktif juga di halaman paket, mengerjakan soal, dan hasil) -->
             <li class="nav-item {{ request()->routeIs('admin.kerjakan*') ? 'active' : '' }}">
                 <a href="{{ route('admin.kerjakan.index') }}">
@@ -80,7 +92,8 @@
                 </a>
             </li>
 
-            {{-- Menu berikutnya ditambah di sini setelah route-nya dibuat. --}}
+            {{-- Menu berikutnya ditambah di sini setelah route-nya dibuat.
+                 Menu data -> di bawah "Data Master"; menu belajar/progres -> di bawah "Proses & Progres". --}}
 
             <!-- Logout -->
             <li class="nav-item mt-4">

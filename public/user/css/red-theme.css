@@ -485,3 +485,34 @@ label.fw-bold {
     padding-right: 0 !important;
     max-width: none;
 }
+
+/* =====================================================================
+   PEMISAH GRUP MENU SIDEBAR (Data Master / Proses & Progres)
+   ===================================================================== */
+.sidebar[data-background-color="dark"] .nav.nav-secondary > .nav-section {
+    margin: 14px 0 4px;
+    padding: 0 10px;
+}
+.sidebar[data-background-color="dark"] .nav.nav-secondary > .nav-section .text-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 6px 26px;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .62);
+}
+/* garis tipis setelah teks */
+.sidebar[data-background-color="dark"] .nav.nav-secondary > .nav-section .text-section::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0));
+}
+.sidebar[data-background-color="dark"] .nav.nav-secondary > .nav-section .sidebar-mini-icon {
+    color: rgba(255, 255, 255, .6);
+}
+
