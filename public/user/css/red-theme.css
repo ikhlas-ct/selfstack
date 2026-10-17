@@ -441,20 +441,23 @@ label.fw-bold {
 }
 
 /* =====================================================================
-   SIDEBAR PAKAI GAMBAR (public/user/img/pagoda.jpg)
-   Gambar di-"multiply" dengan warna sidebar: bagian putih gambar menyatu
-   dengan warna merah tua, jadi tidak ada garis tepi & teks menu tetap jelas.
+   SIDEBAR PAKAI GAMBAR
+   - atas  : ../img/sidebar-top.svg  (dahan sakura + matahari merah + awan)
+   - bawah : ../img/pagoda.jpg       (di-"multiply" dengan warna sidebar, jadi
+             bagian putih gambar menyatu dan teks menu tetap terbaca)
+   Urutan layer: atas -> bawah = svg atas, gradasi penutup, pagoda.
    ===================================================================== */
 .sidebar[data-background-color="dark"],
 .sidebar {
     background-color: var(--cg-side) !important;
     background-image:
+        url('../img/sidebar-top.svg'),
         linear-gradient(180deg, var(--cg-side) 0%, var(--cg-side) 45%, rgba(91, 25, 24, 0) 80%),
         url('../img/pagoda.jpg') !important;
-    background-repeat: no-repeat, no-repeat !important;
-    background-position: left top, left bottom !important;
-    background-size: 100% 100%, 100% auto !important;
-    background-blend-mode: normal, multiply !important;
+    background-repeat: no-repeat, no-repeat, no-repeat !important;
+    background-position: left top, left top, left bottom !important;
+    background-size: 100% auto, 100% 100%, 100% auto !important;
+    background-blend-mode: normal, normal, multiply !important;
 }
 
 /* pagoda svg lama & awan hias dimatikan supaya tidak dobel dengan gambar */
@@ -469,4 +472,16 @@ label.fw-bold {
 .sidebar .sidebar-wrapper,
 .sidebar .sidebar-content {
     background: transparent !important;
+}
+
+/* =====================================================================
+   HEADER ATAS (kartu judul otomatis) dibuat PENUH selebar konten,
+   sama seperti kartu header bawaan tiap halaman.
+   Header bawaan halaman tidak diubah/dihapus.
+   ===================================================================== */
+.cg-page-header-wrap,
+.cg-page-header-wrap .page-inner {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: none;
 }
