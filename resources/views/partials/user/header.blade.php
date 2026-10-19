@@ -7,18 +7,15 @@
             $dashboardRoute = $authUser->isAdmin() ? route('admin.dashboard') : '#';
             $profilRoute    = $authUser->isAdmin() ? route('admin.profil') : '#';
 
-            // Data profil (nama, foto) sesuai role
-            $profilData = match ($authUser->role) {
-                'admin' => $authUser->admin,
-                default => $authUser->pelajar,
-            };
+            // Data profil diambil langsung dari tabel users (kolom nama, moto, foto, email).
+            // `name` = kolom nama, atau username kalau nama belum diisi.
+            $profilNama  = $authUser->name;
+            $profilMoto  = $authUser->moto;
+            $profilEmail = $authUser->email ?: 'Tidak ada email';
 
-            $profilNama  = $profilData?->nama ?? $authUser->username;
-            $profilEmail = $authUser->email ?? 'Tidak ada email';
-
-            // Foto disimpan di storage/app/public (kolom `foto`)
-            $profilFoto = !empty($profilData?->foto) && file_exists(storage_path('app/public/' . $profilData->foto))
-                ? asset('storage/' . $profilData->foto)
+            // Foto disimpan di storage/app/public (kolom `foto`); kalau tidak ada / filenya hilang, pakai foto bawaan
+            $profilFoto = !empty($authUser->foto) && file_exists(storage_path('app/public/' . ltrim($authUser->foto, '/')))
+                ? $authUser->foto_url
                 : asset('default-image/default-user.png');
         @endphp
 
@@ -57,10 +54,13 @@
                                 </div>
                                 <div class="u-text">
                                     <h4>{{ $profilNama }}</h4>
-                                    <p class="text-muted">{{ $profilEmail }}</p>
+                                    <p class="text-muted mb-1">{{ $profilEmail }}</p>
+                                    @if (filled($profilMoto))
+                                        <p class="text-muted fst-italic small mb-2">&ldquo;{{ $profilMoto }}&rdquo;</p>
+                                    @endif
                                     @if ($authUser->isAdmin())
                                         <a href="{{ $profilRoute }}" class="btn btn-xs btn-secondary btn-sm">
-                                            View Profile
+                                            Profil Saya
                                         </a>
                                     @endif
                                 </div>

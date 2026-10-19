@@ -3,9 +3,12 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FlashcardController;
 use App\Http\Controllers\Admin\HafalanController;
+use App\Http\Controllers\Admin\HafalanRadikalController;
 use App\Http\Controllers\Admin\KerjakanSoalController;
 use App\Http\Controllers\Admin\KosakataController;
+use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\ProfilController;
+use App\Http\Controllers\Admin\RadikalController;
 use App\Http\Controllers\Admin\SoalController;
 use App\Http\Controllers\Login\AuthController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/profil', [ProfilController::class, 'update'])->name('admin.profil.update');
     Route::put('/admin/profil/password', [ProfilController::class, 'password'])->name('admin.profil.password');
 
+    // Pengaturan website (hanya 1 baris data, jadi cuma edit & update) -> admin.pengaturan.edit / update
+    Route::get('/admin/pengaturan', [PengaturanController::class, 'edit'])->name('admin.pengaturan.edit');
+    Route::put('/admin/pengaturan', [PengaturanController::class, 'update'])->name('admin.pengaturan.update');
+
     // Kosakata -> URL /admin/kosakata..., nama route admin.kosakata.*
     Route::prefix('admin')->name('admin.')->group(function () {
         // Import & template HARUS di atas resource, kalau tidak "/admin/kosakata/import"
@@ -42,11 +49,28 @@ Route::middleware('auth')->group(function () {
         Route::resource('kosakata', KosakataController::class)
             ->parameters(['kosakata' => 'kosakata']);
 
+        // Radikal -> URL /admin/radikal..., nama route admin.radikal.*
+        // Import, template & export HARUS di atas resource, kalau tidak "/admin/radikal/import"
+        // dianggap sebagai {radikal}.
+        Route::get('radikal/import', [RadikalController::class, 'import'])->name('radikal.import');
+        Route::post('radikal/import', [RadikalController::class, 'importStore'])->name('radikal.import.store');
+        Route::get('radikal/template', [RadikalController::class, 'template'])->name('radikal.template');
+        Route::get('radikal/export', [RadikalController::class, 'export'])->name('radikal.export');
+
+        Route::resource('radikal', RadikalController::class)
+            ->parameters(['radikal' => 'radikal']);
+
         // Progres hafalan kosakata -> admin.hafalan.index / riwayat / status
         Route::get('hafalan', [HafalanController::class, 'index'])->name('hafalan.index');
         Route::get('hafalan/{kosakata}/riwayat', [HafalanController::class, 'riwayat'])->name('hafalan.riwayat');
         // Tombol "Pindahkan ke" di popup (dipanggil lewat route('admin.hafalan.status') di HafalanController::riwayat)
         Route::post('hafalan/{kosakata}/status', [HafalanController::class, 'pindahStatus'])->name('hafalan.status');
+
+        // Progres hafalan radikal -> admin.hafalan-radikal.index / riwayat / status
+        // (nama "hafalan-radikal" sengaja beda dari "hafalan" supaya tidak bentrok dengan route kosakata)
+        Route::get('hafalan-radikal', [HafalanRadikalController::class, 'index'])->name('hafalan-radikal.index');
+        Route::get('hafalan-radikal/{radikal}/riwayat', [HafalanRadikalController::class, 'riwayat'])->name('hafalan-radikal.riwayat');
+        Route::post('hafalan-radikal/{radikal}/status', [HafalanRadikalController::class, 'updateStatus'])->name('hafalan-radikal.status');
 
         // Flashcard hafalan kosakata -> admin.flashcard.index / mulai / jawab
         Route::get('flashcard', [FlashcardController::class, 'index'])->name('flashcard.index');

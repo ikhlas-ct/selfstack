@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 /**
  * Akun pengguna aplikasi. Login memakai username.
  *
- * Catatan: tabel users tidak punya kolom `name`, jadi accessor `name`
- * memetakannya ke `username` agar {{ auth()->user()->name }} tetap jalan.
+ * Kolom `nama` = nama tampil, `moto` = kalimat singkat milik pengguna.
+ * Accessor `name` memakai `nama`, dan kalau kosong jatuh ke `username`,
+ * jadi {{ auth()->user()->name }} tetap jalan untuk akun lama yang belum punya nama.
  */
 class User extends Authenticatable
 {
@@ -19,7 +21,9 @@ class User extends Authenticatable
 
     protected $fillable = [
         'username',
+        'nama',
         'email',
+        'moto',
         'password',
         'foto',
     ];
@@ -43,10 +47,16 @@ class User extends Authenticatable
         return true;
     }
 
-    /** Alias nama tampil = username. */
+    /** Nama tampil: kolom `nama`, atau `username` kalau nama belum diisi. */
     public function getNameAttribute(): string
     {
-        return $this->username;
+        return filled($this->nama) ? $this->nama : $this->username;
+    }
+
+    /** Huruf pertama nama, untuk avatar kalau belum ada foto. */
+    public function getInisialAttribute(): string
+    {
+        return Str::upper(Str::substr($this->name, 0, 1));
     }
 
     /** URL foto profil (disk public), atau null kalau belum ada foto. */

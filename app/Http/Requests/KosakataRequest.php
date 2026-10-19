@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Kosakata;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class KosakataRequest extends FormRequest
+/**
+ * Validasi tambah/ubah radikal. Aturannya juga dipakai oleh import Excel
+ * (lihat App\Imports\RadikalImport) supaya form dan Excel selalu sama.
+ */
+class RadikalRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,107 +17,97 @@ class KosakataRequest extends FormRequest
     }
 
     /**
-     * Baris contoh kalimat yang kosong semua (hanzi, pinyin, arti, catatan)
-     * dibuang dulu supaya tidak kena validasi "wajib diisi".
-     * Saat edit, baris lama yang dikosongkan otomatis ikut terhapus.
+     * "氵, 氺" / "氵氺" / "氵;氺" -> ["氵", "氺"]
+     * Varian radikal selalu satu karakter, jadi teks yang disambung ikut dipecah per karakter.
      */
+    public static function pecahVarian(?string $teks): array
+    {
+        if ($teks === null || trim($teks) === '') {
+            return [];
+        }
+
+        $bagian = preg_split('/[\s,;，、；]+/u', $teks, -1, PREG_SPLIT_NO_EMPTY);
+        $huruf  = [];
+        foreach ($bagian as $b) {
+            array_push($huruf, ...mb_str_split($b));
+        }
+
+        return array_values(array_unique($huruf));
+    }
+
     protected function prepareForValidation(): void
     {
-        $contoh = collect($this->input('contoh_kalimat', []))
-            ->filter(function ($baris) {
-                if (! is_array($baris)) {
-                    return false;
-                }
+        $bersih = [];
 
-                return collect($baris)
-                    ->only(['hanzi', 'pinyin', 'arti_indonesia', 'catatan_tata_bahasa'])
-                    ->filter(fn ($nilai) => filled($nilai))
-                    ->isNotEmpty();
-            })
-            ->values()
-            ->all();
+        foreach (['hanzi', 'pinyin', 'arti_indonesia', 'keterangan', 'nomor_kangxi', 'jumlah_goresan', 'urutan'] as $kolom) {
+            $nilai = $this->input($kolom);
+            $nilai = is_string($nilai) ? trim($nilai) : $nilai;
+            $bersih[$kolom] = $nilai === '' ? null : $nilai;
+        }
 
-        $this->merge(['contoh_kalimat' => $contoh]);
+        $varian = $this->input('varian');
+        $bersih['varian'] = is_array($varian) ? $varian : self::pecahVarian($varian);
+
+        $this->merge($bersih);
     }
 
     public function rules(): array
     {
-        // Saat edit, route punya parameter {kosakata} (model hasil route-model binding).
-        $id = $this->route('kosakata')?->id;
-
-        return [
-            'kategori_id'    => ['nullable', 'integer', 'exists:kategoris,id'],
-            'level_tocfl_id' => ['nullable', 'integer', 'exists:level_tocfls,id'],
-
-            'hanzi'          => [
-                'required', 'string', 'max:20',
-                // Di database yang unik adalah gabungan hanzi + pinyin (kosakatas_hanzi_pinyin_unique).
-                Rule::unique('kosakatas', 'hanzi')
-                    ->where(fn ($q) => $q->where('pinyin', $this->input('pinyin')))
-                    ->ignore($id),
-            ],
-            'pinyin'         => ['required', 'string', 'max:60'],
-            'zhuyin'         => ['nullable', 'string', 'max:100'],
-            'baca_indonesia' => ['nullable', 'string', 'max:60'],
-
-            // arti_indonesia di database boleh NULL (mis. data awal dari daftar TOCFL yang baru berbahasa Inggris).
-            'arti_indonesia' => ['nullable', 'string', 'max:150'],
-            'arti_singkat'   => ['nullable', 'string', 'max:100'],
-            'english'        => ['nullable', 'string', 'max:150'],
-
-            'jenis_kata'     => ['nullable', 'string', Rule::in(Kosakata::JENIS_KATA)],
-            'sub_jenis'      => ['nullable', 'string', Rule::in(Kosakata::SUB_JENIS)],
-
-            'kegunaan'       => ['nullable', 'string', 'max:2000'],
-            'kata_pengait'   => ['nullable', 'string', 'max:1000'],
-            'urutan'         => ['nullable', 'integer', 'min:0'],
-
-            'contoh_kalimat'                       => ['nullable', 'array', 'max:20'],
-            'contoh_kalimat.*.id'                  => ['nullable', 'integer'],
-            'contoh_kalimat.*.hanzi'               => ['required', 'string', 'max:255'],
-            'contoh_kalimat.*.pinyin'              => ['required', 'string', 'max:255'],
-            'contoh_kalimat.*.arti_indonesia'      => ['required', 'string', 'max:255'],
-            'contoh_kalimat.*.catatan_tata_bahasa' => ['nullable', 'string', 'max:255'],
-        ];
+        return self::aturan($this->route('radikal')?->id);
     }
 
     public function messages(): array
     {
-        return [
-            'required'     => ':attribute wajib diisi.',
-            'max.string'   => ':attribute maksimal :max karakter.',
-            'max.array'    => ':attribute maksimal :max baris.',
-            'integer'      => ':attribute harus berupa angka bulat.',
-            'min.numeric'  => ':attribute tidak boleh negatif.',
-            'exists'       => ':attribute yang dipilih tidak valid.',
-            'in'           => ':attribute yang dipilih tidak valid.',
-            'hanzi.unique' => 'Kombinasi hanzi dan pinyin ini sudah ada di daftar kosakata.',
-        ];
+        return self::pesan();
     }
 
     public function attributes(): array
     {
-        return [
-            'kategori_id'    => 'Kategori',
-            'level_tocfl_id' => 'Level TOCFL',
-            'hanzi'          => 'Hanzi',
-            'pinyin'         => 'Pinyin',
-            'zhuyin'         => 'Zhuyin',
-            'baca_indonesia' => 'Cara baca Indonesia',
-            'arti_indonesia' => 'Arti Indonesia',
-            'arti_singkat'   => 'Arti singkat',
-            'english'        => 'Arti Inggris',
-            'jenis_kata'     => 'Jenis kata',
-            'sub_jenis'      => 'Sub jenis',
-            'kegunaan'       => 'Kegunaan kata',
-            'kata_pengait'   => 'Kata pengait',
-            'urutan'         => 'Urutan',
+        return self::atribut();
+    }
 
-            'contoh_kalimat'                       => 'Contoh kalimat',
-            'contoh_kalimat.*.hanzi'               => 'Hanzi contoh kalimat',
-            'contoh_kalimat.*.pinyin'              => 'Pinyin contoh kalimat',
-            'contoh_kalimat.*.arti_indonesia'      => 'Arti contoh kalimat',
-            'contoh_kalimat.*.catatan_tata_bahasa' => 'Catatan tata bahasa',
+    public static function aturan(?int $abaikanId = null): array
+    {
+        return [
+            'nomor_kangxi'   => ['nullable', 'integer', 'between:1,214', Rule::unique('radikals', 'nomor_kangxi')->ignore($abaikanId)],
+            'hanzi'          => ['required', 'string', 'max:8', Rule::unique('radikals', 'hanzi')->ignore($abaikanId)],
+            'varian'         => ['nullable', 'array', 'max:10'],
+            'varian.*'       => ['string', 'max:8'],
+            'pinyin'         => ['required', 'string', 'max:100'],
+            'arti_indonesia' => ['required', 'string', 'max:500'],
+            'keterangan'     => ['nullable', 'string', 'max:2000'],
+            'jumlah_goresan' => ['nullable', 'integer', 'between:1,30'],
+            'urutan'         => ['nullable', 'integer', 'between:0,65535'],
+        ];
+    }
+
+    public static function pesan(): array
+    {
+        return [
+            'required'     => ':attribute wajib diisi.',
+            'unique'       => ':attribute ini sudah dipakai radikal lain.',
+            'integer'      => ':attribute harus berupa angka bulat.',
+            'between'      => ':attribute harus di antara :min dan :max.',
+            'max'          => ':attribute maksimal :max karakter.',
+            'string'       => ':attribute tidak valid.',
+            'array'        => ':attribute tidak valid.',
+            'varian.max'   => 'Varian maksimal :max buah.',
+            'varian.*.max' => 'Setiap varian maksimal :max karakter.',
+        ];
+    }
+
+    public static function atribut(): array
+    {
+        return [
+            'nomor_kangxi'   => 'Nomor Kangxi',
+            'hanzi'          => 'Hanzi',
+            'varian'         => 'Varian',
+            'varian.*'       => 'Varian',
+            'pinyin'         => 'Pinyin',
+            'arti_indonesia' => 'Arti Indonesia',
+            'keterangan'     => 'Keterangan',
+            'jumlah_goresan' => 'Jumlah goresan',
+            'urutan'         => 'Urutan',
         ];
     }
 }

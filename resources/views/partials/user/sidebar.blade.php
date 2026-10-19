@@ -54,6 +54,14 @@
                 </a>
             </li>
 
+            <!-- Radikal (aktif juga di halaman create, edit, show, dan import) -->
+            <li class="nav-item {{ request()->routeIs('admin.radikal*') ? 'active' : '' }}">
+                <a href="{{ route('admin.radikal.index') }}">
+                    <i class="fas fa-cubes"></i>
+                    <p>Radikal</p>
+                </a>
+            </li>
+
             <!-- Paket Soal (aktif juga di halaman detail paket, tambah/ubah paket, dan tambah/ubah soal) -->
             <li class="nav-item {{ request()->routeIs('admin.grup-soal*', 'admin.soal*') ? 'active' : '' }}">
                 <a href="{{ route('admin.grup-soal.index') }}">
@@ -69,10 +77,19 @@
             </li>
 
             <!-- Progres Hafalan -->
-            <li class="nav-item {{ request()->routeIs('admin.hafalan*') ? 'active' : '' }}">
+            {{-- 'admin.hafalan.*' (pakai titik) supaya tidak ikut aktif di admin.hafalan-radikal.* --}}
+            <li class="nav-item {{ request()->routeIs('admin.hafalan.*') ? 'active' : '' }}">
                 <a href="{{ route('admin.hafalan.index') }}">
                     <i class="fas fa-chart-pie"></i>
                     <p>Progres Hafalan</p>
+                </a>
+            </li>
+
+            <!-- Progres Hafalan Radikal -->
+            <li class="nav-item {{ request()->routeIs('admin.hafalan-radikal.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.hafalan-radikal.index') }}">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <p>Progres Radikal</p>
                 </a>
             </li>
 
@@ -92,8 +109,30 @@
                 </a>
             </li>
 
+            <!-- ================= PENGATURAN ================= -->
+            <li class="nav-section">
+                <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                <h4 class="text-section">Pengaturan</h4>
+            </li>
+
+            <!-- Pengaturan Website (nama, logo, kontak, halaman depan, target belajar) -->
+            <li class="nav-item {{ request()->routeIs('admin.pengaturan*') ? 'active' : '' }}">
+                <a href="{{ route('admin.pengaturan.edit') }}">
+                    <i class="fas fa-cog"></i>
+                    <p>Pengaturan Website</p>
+                </a>
+            </li>
+
+            <!-- Profil Saya (nama, moto, foto, username, email, password) -->
+            <li class="nav-item {{ request()->routeIs('admin.profil*') ? 'active' : '' }}">
+                <a href="{{ route('admin.profil') }}">
+                    <i class="fas fa-user-circle"></i>
+                    <p>Profil Saya</p>
+                </a>
+            </li>
+
             {{-- Menu berikutnya ditambah di sini setelah route-nya dibuat.
-                 Menu data -> di bawah "Data Master"; menu belajar/progres -> di bawah "Proses & Progres". --}}
+                 Menu data -> di bawah "Data Master"; menu belajar/progres -> di bawah "Proses & Progres"; menu pengaturan -> di bawah "Pengaturan". --}}
 
             <!-- Logout -->
             <li class="nav-item mt-4">

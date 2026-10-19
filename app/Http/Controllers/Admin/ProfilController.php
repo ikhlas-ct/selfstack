@@ -3,76 +3,97 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\View\View;
 
 /**
- * Profil akun yang sedang login (tabel users: username, email, foto, password).
- * R : index    (tampil profil)
- * U : update   (ubah username, email, foto)
- * + : password (ganti password akun)
+ * Profil akun yang sedang login (edit saja, tanpa CRUD).
+ *   GET admin/profil          -> admin.profil           (index)
+ *   PUT admin/profil          -> admin.profil.update    (update)
+ *   PUT admin/profil/password -> admin.profil.password  (password)
  */
 class ProfilController extends Controller
 {
-    public function index()
+    public function index(Request $request): View
     {
-        return view('pages.admin.profil', ['user' => Auth::user()]);
+        return view('pages.profil.index', ['user' => $request->user()]);
     }
 
-    public function update(Request $request)
+    public function update(Request $request): RedirectResponse
     {
-        $user = Auth::user();
+        $user = $request->user();
 
         $data = $request->validate([
-            'username' => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($user->id)],
-            'email'    => ['required', 'email', 'max:100', Rule::unique('users', 'email')->ignore($user->id)],
-            'foto'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'nama'     => ['required', 'string', 'max:100'],
+            'moto'     => ['nullable', 'string', 'max:150'],
+            'username' => [
+                'required', 'string', 'max:100', 'regex:/^[A-Za-z0-9._-]+$/',
+                Rule::unique('users', 'username')->ignore($user->id),
+            ],
+            'email'    => [
+                'required', 'email', 'max:100',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'foto'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'hapus_foto' => ['nullable', 'boolean'],
         ], [
-            'username.required' => 'Username wajib diisi.',
-            'username.unique'   => 'Username sudah dipakai.',
-            'email.required'    => 'Email wajib diisi.',
-            'email.email'       => 'Format email tidak valid.',
-            'email.unique'      => 'Email sudah dipakai.',
-            'foto.image'        => 'File harus berupa gambar.',
-            'foto.max'          => 'Ukuran foto maksimal 2 MB.',
+            'required' => ':attribute wajib diisi.',
+            'max'      => ':attribute terlalu panjang (maksimal :max).',
+            'unique'   => ':attribute sudah dipakai akun lain.',
+            'email'    => 'Format email belum benar.',
+            'regex'    => 'Username hanya boleh huruf, angka, titik, garis bawah, dan strip (tanpa spasi).',
+            'image'    => ':attribute harus berupa gambar.',
+            'mimes'    => ':attribute harus berformat :values.',
+            'uploaded' => ':attribute gagal diunggah. Cek ukuran file-nya.',
+        ], [
+            'nama' => 'Nama', 'moto' => 'Moto', 'username' => 'Username',
+            'email' => 'Email', 'foto' => 'Foto',
         ]);
 
-        // Foto dikelola terpisah agar file lama ikut terhapus saat diganti.
-        unset($data['foto']);
-
+        // Foto: ganti / hapus / biarkan.
+        $fotoLama = null;
         if ($request->hasFile('foto')) {
-            if ($user->foto && ! str_starts_with($user->foto, 'http')) {
-                Storage::disk('public')->delete($user->foto);
-            }
-            $data['foto'] = $request->file('foto')->store('profil', 'public');
+            $fotoLama     = $user->foto;
+            $data['foto'] = $request->file('foto')->store('foto-user', 'public');
+        } elseif ($request->boolean('hapus_foto')) {
+            $fotoLama     = $user->foto;
+            $data['foto'] = null;
+        } else {
+            unset($data['foto']);
         }
+        unset($data['hapus_foto']);
 
         $user->update($data);
 
-        return redirect()->route('admin.profil')
-            ->with('success', 'Profil berhasil diperbarui.');
+        // File lama baru dihapus setelah data berhasil tersimpan.
+        if (filled($fotoLama)) {
+            Storage::disk('public')->delete(ltrim($fotoLama, '/'));
+        }
+
+        return redirect()->route('admin.profil')->with('success', 'Profil berhasil disimpan.');
     }
 
-    public function password(Request $request)
+    public function password(Request $request): RedirectResponse
     {
-        $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password'         => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()],
+        // Error password dipisah ("bag" sendiri) supaya tidak tercampur dengan error form profil.
+        $request->validateWithBag('gantiPassword', [
+            'password_lama' => ['required', 'current_password'],
+            'password'      => ['required', 'string', 'min:8', 'confirmed'],
         ], [
-            'current_password.required'         => 'Password saat ini wajib diisi.',
-            'current_password.current_password' => 'Password saat ini tidak sesuai.',
-            'password.required'                 => 'Password baru wajib diisi.',
-            'password.confirmed'                => 'Konfirmasi password tidak cocok.',
+            'required'         => ':attribute wajib diisi.',
+            'current_password' => 'Password lama salah.',
+            'min'              => ':attribute baru minimal :min karakter.',
+            'confirmed'        => 'Konfirmasi password tidak sama.',
+        ], [
+            'password_lama' => 'Password lama',
+            'password'      => 'Password',
         ]);
 
-        // Cast 'hashed' di model User otomatis meng-hash password.
-        Auth::user()->update(['password' => $request->password]);
+        $request->user()->update(['password' => $request->input('password')]); // di-hash oleh cast 'hashed'
 
-        return redirect()->route('admin.profil')
-            ->with('success', 'Password berhasil diubah.')
-            ->with('tab', 'password');
+        return redirect()->route('admin.profil')->with('success', 'Password berhasil diganti.');
     }
 }
