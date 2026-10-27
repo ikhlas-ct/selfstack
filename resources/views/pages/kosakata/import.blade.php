@@ -110,6 +110,9 @@
                                 ['contoh_baru', 'Contoh baru', 'text-success'],
                                 ['contoh_diperbarui', 'Contoh diperbarui', 'text-primary'],
                                 ['contoh_dilewati', 'Contoh dilewati', ''],
+                                ['karakter_baru', 'Karakter baru', 'text-success'],
+                                ['karakter_diperbarui', 'Karakter diperbarui', 'text-primary'],
+                                ['karakter_dilewati', 'Karakter dilewati', ''],
                                 ['pecahan_baru', 'Pecahan baru', 'text-success'],
                                 ['pecahan_diperbarui', 'Pecahan diperbarui', 'text-primary'],
                                 ['pecahan_dilewati', 'Pecahan dilewati', ''],
@@ -222,7 +225,7 @@
                             </div>
 
                             <p class="text-muted" style="font-size:.83rem;">
-                                File boleh berisi sampai lima sheet. Hanya sheet <code>Kosakata</code> yang utama, sheet lain opsional
+                                File boleh berisi sampai enam sheet. Hanya sheet <code>Kosakata</code> yang utama, sheet lain opsional
                                 (sheet yang tidak ada di file dilewati). Nama sheet dan judul kolom (baris 1) harus persis seperti di bawah,
                                 paling mudah dengan mengisi template.
                             </p>
@@ -265,6 +268,22 @@
                                 </table>
                             </div>
 
+                            <div class="fw-semibold mb-1" style="font-size:.85rem;">Sheet <code>Karakter</code> - satu baris satu karakter (hanzi + pinyin)</div>
+                            <div class="table-responsive mb-3">
+                                <table class="table mb-0">
+                                    <thead><tr><th>Kolom</th><th>Wajib</th><th>Keterangan</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><code>hanzi</code></td><td>Ya</td><td>Satu karakter (maks. 8)</td></tr>
+                                        <tr><td><code>pinyin</code></td><td>Ya</td><td>Hanzi + pinyin harus unik. Karakter berbunyi ganda dibuat jadi beberapa baris</td></tr>
+                                        <tr><td><code>baca_indonesia</code></td><td>-</td><td></td></tr>
+                                        <tr><td><code>arti_indonesia</code></td><td>Ya</td><td>Arti kamus karakter</td></tr>
+                                        <tr><td><code>english</code></td><td>-</td><td></td></tr>
+                                        <tr><td><code>level_tocfl</code></td><td>-</td><td>Angka 1 sampai 6</td></tr>
+                                        <tr><td><code>urutan</code></td><td>-</td><td>Angka, kosong = 0</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
                             <div class="fw-semibold mb-1" style="font-size:.85rem;">Sheet <code>Pecahan Karakter</code> - satu baris satu karakter di dalam kata</div>
                             <div class="table-responsive mb-3">
                                 <table class="table mb-0">
@@ -273,7 +292,7 @@
                                         <tr><td><code>kosakata_hanzi</code></td><td>Ya</td><td>Harus sama persis dengan kosakatanya</td></tr>
                                         <tr><td><code>kosakata_pinyin</code></td><td>Ya</td><td></td></tr>
                                         <tr><td><code>urutan</code></td><td>Ya</td><td>Posisi karakter di dalam kata, mulai dari 1 (kiri ke kanan)</td></tr>
-                                        <tr><td><code>karakter_hanzi</code></td><td>Ya</td><td>Karakter harus sudah ada di data karakter</td></tr>
+                                        <tr><td><code>karakter_hanzi</code></td><td>Ya</td><td>Karakter harus sudah ada di data karakter, atau diisi lewat sheet <code>Karakter</code></td></tr>
                                         <tr><td><code>karakter_pinyin</code></td><td>Ya</td><td>Sama persis dengan pinyin karakter di data karakter</td></tr>
                                         <tr><td><code>pinyin_di_kata</code></td><td>-</td><td>Isi kalau bacaan di kata ini berbeda dari kamus</td></tr>
                                         <tr><td><code>arti_di_kata</code></td><td>-</td><td>Isi kalau arti di kata ini berbeda dari kamus</td></tr>

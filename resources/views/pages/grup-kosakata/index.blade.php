@@ -6,132 +6,88 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    body, .card, .table, .btn, .form-control, .form-select, h4, h5, h6 { font-family: 'Plus Jakarta Sans', sans-serif; }
-
-    :root {
-        --gk-blue: #1a73e8;
-        --gk-blue-dark: #1558b0;
-        --gk-ink: #1e293b;
-        --gk-muted: #64748b;
-        --gk-faint: #94a3b8;
-        --gk-line: #e2e8f0;
-        --gk-soft: #f8fafc;
-        --gk-hanzi: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', 'Plus Jakarta Sans', sans-serif;
-    }
+    body, .card, .table, .btn, h4, h5 { font-family: 'Plus Jakarta Sans', sans-serif; }
 
     /* ===== PAGE HEADER ===== */
     .ph-card { background: #fff; border: 1px solid #e9ecef; border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 1.25rem; position: relative; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,.05); }
     .ph-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 14px 0 0 14px; }
-    .ph-card.index-page::before, .ph-card.show-page::before { background: #0369a1; }
-    .ph-card.create-page::before { background: #16a34a; }
-    .ph-card.edit-page::before { background: #e96c1a; }
-    .ph-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .ph-card.index-page::before { background: #1a73e8; }
+    .ph-left { display: flex; align-items: center; gap: 12px; }
     .ph-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
-    .ph-icon.index, .ph-icon.show { background: #e0f2fe; color: #0369a1; }
-    .ph-icon.create { background: #dcfce7; color: #16a34a; }
-    .ph-icon.edit { background: #fff4ed; color: #e96c1a; }
-    .ph-title { font-size: 1.05rem; font-weight: 700; color: var(--gk-ink); letter-spacing: -.2px; line-height: 1.2; margin: 0; }
+    .ph-icon.index { background: #e8f0fe; color: #1a73e8; }
+    .ph-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; letter-spacing: -.2px; line-height: 1.2; margin: 0; }
     .ph-breadcrumb { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-top: 4px; list-style: none; padding: 0; margin-bottom: 0; }
     .ph-breadcrumb li { display: flex; align-items: center; }
     .ph-breadcrumb li + li::before { content: '›'; color: #cbd5e1; font-size: .7rem; margin: 0 4px; }
-    .ph-breadcrumb a { font-size: .75rem; color: var(--gk-blue); text-decoration: none; }
+    .ph-breadcrumb a { font-size: .75rem; color: #1a73e8; text-decoration: none; }
     .ph-breadcrumb a:hover { text-decoration: underline; }
-    .ph-breadcrumb .bc-active { font-size: .75rem; color: var(--gk-faint); }
-    .ph-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ph-breadcrumb .bc-active { font-size: .75rem; color: #94a3b8; }
 
-    /* ===== CARD ===== */
-    .form-card { border: none; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
-    .section-divider { background: #f8f9fa; border-left: 4px solid #1269db; padding: 8px 14px; border-radius: 0 6px 6px 0; font-weight: 600; font-size: .9rem; color: #1269db; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .info-label { font-size: .72rem; font-weight: 600; color: var(--gk-faint); letter-spacing: .02em; }
-    .help-text { font-size: .78rem; color: var(--gk-muted); margin-top: 8px; }
-    .required-mark { color: #dc3545; }
-    label.lbl { font-size: .85rem; font-weight: 600; color: #334155; margin-bottom: 4px; }
+    /* ===== STAT CARDS ===== */
+    .stat-card { border: none; border-radius: 16px; padding: 20px; position: relative; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+    .stat-card::after { content: ''; position: absolute; right: -18px; top: -18px; width: 80px; height: 80px; border-radius: 50%; opacity: .12; }
+    .stat-card.blue   { background: linear-gradient(135deg, #e8f0fe 0%, #dbeafe 100%); } .stat-card.blue::after   { background: #1a73e8; }
+    .stat-card.green  { background: linear-gradient(135deg, #e6f9f0 0%, #d1fae5 100%); } .stat-card.green::after  { background: #16a34a; }
+    .stat-card.orange { background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); } .stat-card.orange::after { background: #ea580c; }
+    .stat-card.purple { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); } .stat-card.purple::after { background: #7c3aed; }
+    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; color: #fff; }
+    .stat-icon.blue { background: #1a73e8; } .stat-icon.green { background: #16a34a; }
+    .stat-icon.orange { background: #ea580c; } .stat-icon.purple { background: #7c3aed; }
+    .stat-value { font-size: 1.85rem; font-weight: 800; line-height: 1; color: #1e293b; }
+    .stat-label { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #64748b; margin-top: 3px; }
 
-    /* ===== ALERT ===== */
-    .alert { border: none; border-radius: 12px; font-size: .85rem; font-weight: 500; padding: 12px 16px; }
-    .alert-success { background: #dcfce7; color: #15803d; }
-    .alert-danger { background: #fee2e2; color: #b91c1c; }
-    .alert-warning { background: #fef3c7; color: #92400e; }
+    /* ===== CARD & FILTER ===== */
+    .filter-card { border: none; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden; }
+    .filter-card .card-header { background: #fff; border-bottom: 1px solid #f1f5f9; padding: 18px 24px; }
+    .filter-card .card-header h5 { font-size: .95rem; font-weight: 700; color: #1e293b; }
+    .filter-section { background: #fafbfc; border-bottom: 1px solid #f1f5f9; padding: 16px 24px; }
 
-    /* ===== FORM ===== */
-    .form-control, .form-select { border-radius: 10px; border: 1.5px solid var(--gk-line); font-size: .85rem; color: #334155; background-color: var(--gk-soft); transition: border-color .2s, box-shadow .2s; }
-    .form-control:focus, .form-select:focus { border-color: var(--gk-blue); background: #fff; box-shadow: 0 0 0 3px rgba(26,115,232,.12); }
-    .form-control::placeholder { color: var(--gk-faint); }
-    .form-control.is-invalid { border-color: #f87171; }
-    .invalid-feedback { font-size: .76rem; }
-    .input-group-text { border-radius: 10px; border: 1.5px solid var(--gk-line); background: #f1f5f9; color: var(--gk-muted); font-size: .8rem; font-weight: 600; }
-    .input-group > .form-control:not(:last-child), .input-group > .input-group-text:not(:last-child) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-    .input-group > .form-control:not(:first-child), .input-group > .btn:not(:first-child), .input-group > .input-group-text:not(:first-child) { border-top-left-radius: 0; border-bottom-left-radius: 0; }
-    .form-check-input:checked { background-color: var(--gk-blue); border-color: var(--gk-blue); }
+    .form-control, .form-select { border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: .83rem; padding: 7px 12px; color: #334155; background-color: #f8fafc; transition: border-color .2s, box-shadow .2s; }
+    .form-control:focus, .form-select:focus { border-color: #1a73e8; background: #fff; box-shadow: 0 0 0 3px rgba(26,115,232,.12); }
+    .form-control::placeholder { color: #94a3b8; }
+    .input-group .input-group-text { background: #f8fafc; border: 1.5px solid #e2e8f0; border-right: none; border-radius: 10px 0 0 10px; color: #94a3b8; font-size: .8rem; }
+    .input-group .form-control { border-left: none; border-radius: 0 10px 10px 0; }
+
+    /* ===== TABLE ===== */
+    .table thead th { background: #f8fafc; color: #64748b; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; padding: 12px 16px; border-bottom: 2px solid #e2e8f0; border-top: none; white-space: nowrap; }
+    .table tbody td { padding: 13px 16px; vertical-align: middle; font-size: .85rem; color: #334155; border-bottom: 1px solid #f1f5f9; }
+    .table tbody tr:last-child td { border-bottom: none; }
+    .table-hover tbody tr:hover td { background: #f8fafc; }
+    .nama-grup { font-weight: 700; color: #1e293b; text-decoration: none; }
+    .nama-grup:hover { color: #1a73e8; }
 
     /* ===== BADGES ===== */
     .badge { font-size: .7rem; font-weight: 600; padding: 4px 9px; border-radius: 6px; letter-spacing: .2px; }
-    .badge-level { background: #e8f0fe; color: var(--gk-blue); }
-    .badge-jumlah { background: #dcfce7; color: #15803d; }
-    .badge-pilih { background: #e0f2fe; color: #0369a1; }
-    .badge-latihan { background: #fef3c7; color: #92400e; }
-    .badge-aktif { background: #dcfce7; color: #15803d; }
-    .badge-draf { background: #f1f5f9; color: var(--gk-muted); }
-    .badge-listening { background: #ede9fe; color: #6d28d9; }
-    .badge-reading { background: #e0f2fe; color: #0369a1; }
+    .badge-aktif    { background: #dcfce7; color: #15803d; }
+    .badge-nonaktif { background: #f1f5f9; color: #64748b; }
+    .badge-level    { background: #e8f0fe; color: #1a73e8; }
+    .badge-jenis    { background: #f5f3ff; color: #7c3aed; }
 
-    /* ===== BUTTONS ===== */
-    .btn-primary { background: linear-gradient(135deg, var(--gk-blue), var(--gk-blue-dark)); border: none; border-radius: 10px; font-weight: 600; font-size: .83rem; padding: 8px 18px; box-shadow: 0 2px 8px rgba(26,115,232,.35); transition: all .2s ease; }
-    .btn-primary:hover { background: linear-gradient(135deg, var(--gk-blue-dark), #0f3e82); box-shadow: 0 4px 14px rgba(26,115,232,.45); transform: translateY(-1px); }
-    .btn-success { border-radius: 10px; font-weight: 600; font-size: .83rem; padding: 8px 18px; }
-    .btn-outline-secondary { border-radius: 10px; font-size: .83rem; border-color: var(--gk-line); color: var(--gk-muted); padding: 7px 12px; }
+    /* ===== ACTION BUTTONS ===== */
+    .btn-action { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-size: .75rem; padding: 0; border: none; transition: all .15s ease; }
+    .btn-detail { background: #e0f2fe; color: #0369a1; } .btn-detail:hover { background: #0369a1; color: #fff; }
+    .btn-edit   { background: #fef9c3; color: #a16207; } .btn-edit:hover   { background: #ca8a04; color: #fff; }
+    .btn-hapus  { background: #fee2e2; color: #dc2626; } .btn-hapus:hover  { background: #dc2626; color: #fff; }
+
+    .btn-primary { background: linear-gradient(135deg, #1a73e8, #1558b0); border: none; border-radius: 10px; font-weight: 600; font-size: .83rem; padding: 8px 18px; box-shadow: 0 2px 8px rgba(26,115,232,.35); transition: all .2s ease; }
+    .btn-primary:hover { background: linear-gradient(135deg, #1558b0, #0f3e82); box-shadow: 0 4px 14px rgba(26,115,232,.45); transform: translateY(-1px); }
+    .btn-outline-secondary { border-radius: 10px; font-size: .83rem; border-color: #e2e8f0; color: #64748b; padding: 7px 12px; }
     .btn-outline-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; color: #334155; }
-    .btn-outline-danger { border-radius: 10px; font-size: .8rem; border-color: #fecaca; color: #dc2626; }
-    .btn-outline-danger:hover { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
-    .btn-outline-warning { border-radius: 10px; font-size: .8rem; }
-    .btn:focus-visible, .tipe-chip input:focus-visible + span { outline: 3px solid rgba(26,115,232,.35); outline-offset: 2px; }
-
-    /* ===== RINGKASAN ANGKA ===== */
-    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1.25rem; }
-    .stat-box { background: #fff; border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 6px rgba(0,0,0,.06); border: 1px solid #eef2f6; }
-    .stat-num { font-size: 1.55rem; font-weight: 800; color: var(--gk-ink); line-height: 1.1; letter-spacing: -.5px; }
-    .stat-cap { font-size: .76rem; color: var(--gk-muted); margin-top: 2px; }
-
-    /* ===== HANZI ===== */
-    .kata-hanzi { font-size: 1.25rem; font-weight: 600; color: var(--gk-ink); font-family: var(--gk-hanzi); }
-    .hanzi-chip { display: inline-block; font-family: var(--gk-hanzi); font-size: 1rem; font-weight: 600; color: var(--gk-ink); background: #f1f5f9; border-radius: 8px; padding: 2px 9px; }
 
     /* ===== EMPTY STATE ===== */
-    .empty-state { padding: 36px 20px; text-align: center; }
-    .empty-state-icon { width: 68px; height: 68px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 1.5rem; color: var(--gk-faint); }
-    .empty-state-title { font-weight: 600; color: var(--gk-muted); margin-bottom: 4px; }
-    .empty-state-text { font-size: .82rem; color: var(--gk-faint); }
-
-    @media (prefers-reduced-motion: reduce) {
-        .btn-primary, .grup-card, .form-control { transition: none; }
-        .btn-primary:hover { transform: none; }
-    }
-
-    .toolbar { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 1rem; }
-    .toolbar form { flex: 1 1 320px; max-width: 460px; }
-
-    .grup-card { background: #fff; border: 1.5px solid #eef2f6; border-radius: 16px; padding: 18px; height: 100%; display: flex; flex-direction: column; box-shadow: 0 1px 6px rgba(0,0,0,.05); transition: border-color .2s, box-shadow .2s; }
-    .grup-card:hover { border-color: #93c5fd; box-shadow: 0 4px 16px rgba(26,115,232,.1); }
-    .grup-nama { font-size: .98rem; font-weight: 700; color: var(--gk-ink); line-height: 1.3; margin: 0; }
-    .grup-nama a { color: inherit; text-decoration: none; }
-    .grup-nama a:hover { color: var(--gk-blue); }
-    .grup-ket { font-size: .8rem; color: var(--gk-muted); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .grup-badges { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
-    .grup-preview { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; min-height: 30px; }
-    .grup-preview .sisa { font-size: .75rem; color: var(--gk-faint); align-self: center; }
-    .grup-aksi { margin-top: auto; display: flex; gap: 6px; padding-top: 12px; border-top: 1px dashed #dbe3ec; }
-    .grup-aksi .btn { padding: 6px 12px; }
-    .grup-aksi .btn-lihat { flex: 1; }
-    .pagination { justify-content: center; margin-top: 1.25rem; }
+    .empty-state { padding: 60px 20px; }
+    .empty-state-icon { width: 72px; height: 72px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.6rem; color: #94a3b8; }
 </style>
 @endsection
 
 @section('content')
     <div class="container">
 
+        {{-- Header – di LUAR page-inner, sama seperti index lain --}}
         <div class="ph-card index-page">
             <div class="ph-left">
-                <div class="ph-icon index"><i class="fas fa-layer-group"></i></div>
+                <div class="ph-icon index"><i class="fas fa-book"></i></div>
                 <div>
                     <h5 class="ph-title">Grup Kosakata</h5>
                     <ol class="ph-breadcrumb" aria-label="breadcrumb">
@@ -140,116 +96,329 @@
                     </ol>
                 </div>
             </div>
-            <div class="ph-actions">
-                <a href="{{ route('admin.grup-kosakata.create') }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus me-1"></i> Buat grup
-                </a>
-            </div>
         </div>
 
         <div class="page-inner">
 
+            {{-- Alert (X + hilang otomatis 3 detik) --}}
             @if (session('success'))
-                <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>{{ session('success') }}</div>
+                <div class="alert alert-success alert-dismissible alert-flash fade show mb-4" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                </div>
             @endif
-            @if (session('error') || $errors->any())
-                <div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>{{ session('error') ?? $errors->first() }}</div>
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible alert-flash fade show mb-4" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                </div>
             @endif
 
-            <div class="stat-row">
-                <div class="stat-box">
-                    <div class="stat-num">{{ $ringkasan['grup'] }}</div>
-                    <div class="stat-cap">Grup kosakata</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-num">{{ $ringkasan['latihan'] }}</div>
-                    <div class="stat-cap">Latihan hasil generate</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-num">{{ $ringkasan['soal'] }}</div>
-                    <div class="stat-cap">Soal yang sudah dibuat</div>
-                </div>
-            </div>
-
-            <div class="toolbar">
-                <form method="GET" class="input-group">
-                    <input type="search" name="search" class="form-control" placeholder="Cari nama grup atau kata di dalamnya…" value="{{ $cari }}">
-                    <button class="btn btn-outline-secondary"><i class="fas fa-search me-1"></i> Cari</button>
-                    @if ($cari !== '')
-                        <a href="{{ route('admin.grup-kosakata.index') }}" class="btn btn-outline-secondary" title="Hapus pencarian"><i class="fas fa-times"></i></a>
-                    @endif
-                </form>
-                <div class="help-text mt-0">{{ $grups->total() }} grup{{ $cari !== '' ? ' ditemukan' : '' }}</div>
-            </div>
-
-            @if ($grups->isEmpty())
-                <div class="card form-card">
-                    <div class="card-body">
-                        <div class="empty-state">
-                            <div class="empty-state-icon"><i class="fas fa-layer-group"></i></div>
-                            @if ($cari !== '')
-                                <div class="empty-state-title">Tidak ada grup yang cocok dengan "{{ $cari }}"</div>
-                                <div class="empty-state-text">Coba kata kunci lain.</div>
-                            @else
-                                <div class="empty-state-title">Belum ada grup kosakata</div>
-                                <div class="empty-state-text mb-3">Kumpulkan beberapa kata, lalu buat soal latihan darinya.</div>
-                                <a href="{{ route('admin.grup-kosakata.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Buat grup pertama</a>
-                            @endif
+            {{-- ===== STAT CARDS ===== --}}
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="card stat-card blue">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon blue"><i class="fas fa-book"></i></div>
+                            <div>
+                                <div class="stat-value">{{ $stats['total'] }}</div>
+                                <div class="stat-label">Total Grup</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            @else
-                <div class="row g-3">
-                    @foreach ($grups as $grup)
-                        @php $sisa = $grup->kosakatas_count - 6; @endphp
-                        <div class="col-md-6 col-xl-4">
-                            <div class="grup-card">
-                                <h6 class="grup-nama">
-                                    <a href="{{ route('admin.grup-kosakata.show', $grup) }}">{{ $grup->nama }}</a>
-                                </h6>
-                                @if ($grup->keterangan)
-                                    <div class="grup-ket">{{ $grup->keterangan }}</div>
-                                @endif
-
-                                <div class="grup-badges">
-                                    <span class="badge badge-jumlah"><i class="fas fa-font me-1"></i>{{ $grup->kosakatas_count }} kata</span>
-                                    @if ($grup->grup_soals_count > 0)
-                                        <span class="badge badge-latihan"><i class="fas fa-clipboard-list me-1"></i>{{ $grup->grup_soals_count }} latihan</span>
-                                    @else
-                                        <span class="badge badge-draf">Belum ada soal</span>
-                                    @endif
-                                </div>
-
-                                <div class="grup-preview">
-                                    @foreach ($grup->kosakatas->take(6) as $k)
-                                        <span class="hanzi-chip">{{ $k->hanzi }}</span>
-                                    @endforeach
-                                    @if ($sisa > 0)
-                                        <span class="sisa">+{{ $sisa }} lagi</span>
-                                    @endif
-                                </div>
-
-                                <div class="grup-aksi">
-                                    <a href="{{ route('admin.grup-kosakata.show', $grup) }}" class="btn btn-primary btn-lihat">
-                                        <i class="fas fa-eye me-1"></i> Lihat &amp; buat soal
-                                    </a>
-                                    <a href="{{ route('admin.grup-kosakata.edit', $grup) }}" class="btn btn-outline-secondary" title="Edit grup" aria-label="Edit {{ $grup->nama }}">
-                                        <i class="fas fa-pen"></i>
-                                    </a>
-                                    <form method="POST" action="{{ route('admin.grup-kosakata.destroy', $grup) }}"
-                                          onsubmit="return confirm('Hapus grup &quot;{{ addslashes($grup->nama) }}&quot;? Latihan yang pernah dibuat darinya tetap tersimpan.')">
-                                        @csrf @method('DELETE')
-                                        <button class="btn btn-outline-danger" title="Hapus grup" aria-label="Hapus {{ $grup->nama }}"><i class="fas fa-trash-alt"></i></button>
-                                    </form>
-                                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card stat-card green">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon green"><i class="fas fa-language"></i></div>
+                            <div>
+                                <div class="stat-value">{{ $stats['kosakata_tergabung'] }}</div>
+                                <div class="stat-label">Kosakata Tergabung</div>
                             </div>
                         </div>
-                    @endforeach
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card stat-card orange">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon orange"><i class="fas fa-inbox"></i></div>
+                            <div>
+                                <div class="stat-value">{{ $stats['kosong'] }}</div>
+                                <div class="stat-label">Grup Masih Kosong</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card stat-card purple">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon purple"><i class="fas fa-hashtag"></i></div>
+                            <div>
+                                <div class="stat-value">{{ $stats['tanpa_pelajaran'] }}</div>
+                                <div class="stat-label">Belum Ada Pelajaran</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ===== FILTER & TABLE CARD ===== --}}
+            <div class="card filter-card shadow-sm">
+
+                <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list text-primary me-2 opacity-75"></i>Daftar Grup Kosakata
+                    </h5>
+                    <a href="{{ route('admin.grup-kosakata.create') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i> Tambah Grup
+                    </a>
                 </div>
 
-                {{ $grups->links() }}
-            @endif
+                {{-- Filter --}}
+                <div class="filter-section">
+                    <form id="form-filter" method="GET" action="{{ route('admin.grup-kosakata.index') }}">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-12 col-md-5">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" name="search" id="input-search" class="form-control" autocomplete="off"
+                                        placeholder="Cari nama buku / keterangan..." value="{{ request('search') }}">
+                                </div>
+                            </div>
 
-        </div>
-    </div>
+                            <div class="col-6 col-md-3">
+                                <select name="isi" class="form-select">
+                                    <option value="">Semua Grup</option>
+                                    <option value="berisi" {{ request('isi') === 'berisi' ? 'selected' : '' }}>Sudah ada kosakata</option>
+                                    <option value="kosong" {{ request('isi') === 'kosong' ? 'selected' : '' }}>Masih kosong</option>
+                                </select>
+                            </div>
+
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-search me-1"></i> Filter
+                                </button>
+                                <a href="{{ route('admin.grup-kosakata.index') }}" class="btn btn-outline-secondary btn-sm ms-1"
+                                    title="Reset filter">
+                                    <i class="fas fa-redo-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {{-- Tabel + pagination (di-refresh lewat AJAX) --}}
+                <div id="tabel-wrap">
+                    @fragment('tabel')
+                {{-- Table --}}
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table-hover mb-0 table">
+                            <thead>
+                                <tr>
+                                    <th width="40">#</th>
+                                    <th>Nama Grup / Buku</th>
+                                    <th>Keterangan</th>
+                                    <th class="text-center">Kosakata</th>
+                                    <th class="text-center">Pelajaran</th>
+                                    <th class="text-center">Paket Soal</th>
+                                    <th width="110">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($grups as $i => $grup)
+                                    <tr>
+                                        <td class="text-muted">{{ $grups->firstItem() + $i }}</td>
+
+                                        <td>
+                                            <a href="{{ route('admin.grup-kosakata.show', $grup) }}" class="nama-grup">{{ $grup->nama }}</a>
+                                        </td>
+
+                                        <td style="max-width:280px;">
+                                            @if ($grup->keterangan)
+                                                <span class="text-muted" title="{{ $grup->keterangan }}">{{ \Illuminate\Support\Str::limit($grup->keterangan, 80) }}</span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+
+                                        <td class="text-center">
+                                            <span class="badge {{ $grup->kosakatas_count > 0 ? 'badge-aktif' : 'badge-nonaktif' }}">
+                                                {{ $grup->kosakatas_count }} kata
+                                            </span>
+                                        </td>
+
+                                        <td class="text-center">
+                                            @if ($grup->jumlah_pelajaran > 0)
+                                                <span class="badge badge-level">{{ $grup->jumlah_pelajaran }} pelajaran</span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+
+                                        <td class="text-center">
+                                            <span class="badge {{ $grup->grup_soals_count > 0 ? 'badge-jenis' : 'badge-nonaktif' }}">
+                                                {{ $grup->grup_soals_count }} paket
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <a href="{{ route('admin.grup-kosakata.show', $grup) }}"
+                                                    class="btn btn-action btn-detail" title="Kelola isi grup">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('admin.grup-kosakata.edit', $grup) }}"
+                                                    class="btn btn-action btn-edit" title="Edit">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-action btn-hapus"
+                                                    data-id="{{ $grup->id }}" data-nama="{{ $grup->nama }}"
+                                                    data-jumlah="{{ $grup->kosakatas_count }}"
+                                                    data-paket="{{ $grup->grup_soals_count }}" title="Hapus">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                                <form id="form-hapus-{{ $grup->id }}"
+                                                    action="{{ route('admin.grup-kosakata.destroy', $grup) }}" method="POST"
+                                                    class="d-none">
+                                                    @csrf @method('DELETE')
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="p-0 text-center">
+                                            <div class="empty-state">
+                                                <div class="empty-state-icon"><i class="fas fa-book"></i></div>
+                                                <div class="fw-semibold text-secondary mb-1">Belum ada grup kosakata</div>
+                                                <div class="text-muted" style="font-size:.8rem;">
+                                                    Buat satu grup untuk tiap buku, lalu masukkan kosakata per pelajaran
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {{-- Pagination --}}
+                @if ($grups->hasPages())
+                    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <small class="text-muted">
+                            Menampilkan
+                            <strong>{{ $grups->firstItem() }}</strong>–<strong>{{ $grups->lastItem() }}</strong>
+                            dari <strong>{{ $grups->total() }}</strong> data
+                        </small>
+                        {{ $grups->links() }}
+                    </div>
+                @endif
+                    @endfragment
+                </div>
+
+            </div>{{-- end .card --}}
+
+        </div>{{-- end .page-inner --}}
+    </div>{{-- end .container --}}
+@endsection
+
+@section('scripts')
+    <script>
+        (function () {
+            const form = document.getElementById('form-filter');
+            const wrap = document.getElementById('tabel-wrap');
+            const search = document.getElementById('input-search');
+            const baseUrl = form.getAttribute('action');
+            let timer = null;
+            let controller = null;
+
+            // Ambil tabel baru dari server (hanya potongan tabel, bukan seluruh halaman).
+            function muat(url, push = true) {
+                if (controller) controller.abort();          // batalkan request lama yang belum selesai
+                controller = new AbortController();
+                wrap.style.opacity = '.5';
+
+                fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    signal: controller.signal,
+                })
+                    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+                    .then(html => {
+                        wrap.innerHTML = html;
+                        wrap.style.opacity = '1';
+                        if (push) history.pushState(null, '', url);
+                    })
+                    .catch(e => {
+                        if (e.name !== 'AbortError') wrap.style.opacity = '1';
+                    });
+            }
+
+            function urlFilter(halaman) {
+                const params = new URLSearchParams(new FormData(form));
+                for (const [k, v] of [...params]) if (v === '') params.delete(k);
+                if (halaman) params.set('page', halaman);
+                const q = params.toString();
+                return q ? baseUrl + '?' + q : baseUrl;
+            }
+
+            // Ketik -> tunggu 300ms setelah berhenti mengetik, baru cari.
+            search.addEventListener('input', () => {
+                clearTimeout(timer);
+                timer = setTimeout(() => muat(urlFilter()), 300);
+            });
+
+            // Ganti dropdown -> langsung filter.
+            form.querySelectorAll('select').forEach(el =>
+                el.addEventListener('change', () => muat(urlFilter())));
+
+            // Tombol Filter / Enter tidak reload halaman.
+            form.addEventListener('submit', e => { e.preventDefault(); clearTimeout(timer); muat(urlFilter()); });
+
+            // Tombol reset.
+            form.querySelector('a[title="Reset filter"]').addEventListener('click', e => {
+                e.preventDefault();
+                form.reset();
+                form.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+                search.value = '';
+                muat(baseUrl);
+            });
+
+            // Pagination (tabel diganti lewat AJAX, jadi pakai event delegation).
+            wrap.addEventListener('click', e => {
+                const a = e.target.closest('.pagination a');
+                if (!a) return;
+                e.preventDefault();
+                muat(a.href);
+                window.scrollTo({ top: form.offsetTop - 80, behavior: 'smooth' });
+            });
+
+            // Tombol back/forward browser.
+            window.addEventListener('popstate', () => muat(location.href, false));
+
+            // Hapus (delegation, karena baris tabel diganti-ganti).
+            wrap.addEventListener('click', e => {
+                const btn = e.target.closest('.btn-hapus[data-id]');
+                if (!btn) return;
+
+                const id = btn.dataset.id;
+                const nama = btn.dataset.nama;
+                const jumlah = parseInt(btn.dataset.jumlah || 0);
+                const paket = parseInt(btn.dataset.paket || 0);
+
+                let teks = `Grup "${nama}" akan dihapus.`;
+                if (jumlah > 0) teks += ` ${jumlah} kosakata dikeluarkan dari grup ini (kosakatanya sendiri tetap ada).`;
+                if (paket > 0) teks += ` ${paket} paket soal yang memakai grup ini tidak ikut terhapus, tapi tidak lagi terhubung ke grup.`;
+
+                swal({
+                    title: 'Hapus Grup Kosakata?',
+                    text: teks,
+                    icon: 'warning',
+                    buttons: { cancel: 'Batal', confirm: { text: 'Ya, Hapus!', className: 'btn-danger' } },
+                    dangerMode: true,
+                }).then(ok => { if (ok) document.getElementById('form-hapus-' + id).submit(); });
+            });
+        })();
+    </script>
 @endsection

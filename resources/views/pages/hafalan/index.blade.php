@@ -116,11 +116,40 @@
     .aksi-hanzi .btn-aksi.utama { background: #1565c0; border-color: #1565c0; color: #fff; }
     .aksi-hanzi .btn-aksi.utama:hover { background: #0f4f9a; }
 
-    .area-penulis { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 18px; }
+    .area-penulis { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; margin-top: 18px; }
+    .item-huruf { display: flex; gap: 16px; align-items: flex-start; background: #f8fafc; border: 1px solid #eef2f7; border-radius: 16px; padding: 14px; }
+    .item-huruf.tunggal { grid-column: 1 / -1; }
+    .item-huruf .kotak-huruf { flex-shrink: 0; }
+    .info-huruf { min-width: 0; flex: 1; font-size: .86rem; line-height: 1.45; color: #334155; }
+    .info-huruf .no { font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
+    .info-huruf .baris-judul { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+    .info-huruf .h { font-size: 1.7rem; font-weight: 800; color: #1e293b; line-height: 1.1; }
+    .info-huruf .p { color: #1a73e8; font-weight: 600; }
+    .info-huruf .arti-huruf { margin-top: 2px; color: #1e293b; }
+    .info-huruf .sub { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #dbe3ee; }
+    .info-huruf .lbl2 { font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; margin-bottom: 3px; }
+    .blok-rad { display: flex; align-items: center; gap: 12px; }
+    .blok-rad .rad-hanzi { flex-shrink: 0; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; background: #eaf2ff; color: #1a73e8; border-radius: 12px; font-size: 1.7rem; font-weight: 800; line-height: 1; }
+    .blok-rad .rad-arti { font-weight: 700; color: #1e293b; }
+    .blok-rad .rad-meta { font-size: .76rem; color: #94a3b8; margin-top: 1px; }
+    .ket-rad { margin-top: 6px; font-size: .8rem; color: #64748b; }
+    .chip-komp { display: inline-flex; align-items: baseline; gap: 4px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1px 8px; margin: 2px 4px 0 0; }
+    .chip-komp .hanzi-text { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
+    .chip-komp small { color: #94a3b8; font-size: .72rem; }
+    .info-huruf .penjelasan { color: #64748b; font-style: italic; font-size: .8rem; margin-top: 8px; }
+    .petunjuk-radikal { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: #1a73e8; margin-right: 6px; vertical-align: middle; }
     .kotak-huruf { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; cursor: pointer; line-height: 0;
         background-image: linear-gradient(to right, transparent calc(50% - .5px), #e2e8f0 calc(50% - .5px), #e2e8f0 calc(50% + .5px), transparent calc(50% + .5px)),
                           linear-gradient(to bottom, transparent calc(50% - .5px), #e2e8f0 calc(50% - .5px), #e2e8f0 calc(50% + .5px), transparent calc(50% + .5px)); }
     .petunjuk-kotak { font-size: .82rem; color: #64748b; margin-top: 10px; }
+
+    .area-urutan { margin-top: 18px; }
+    .area-urutan[hidden] { display: none; }
+    .urutan-huruf + .urutan-huruf { margin-top: 18px; }
+    .urutan-judul { font-weight: 700; font-size: .9rem; color: #1e293b; margin-bottom: 8px; }
+    .urutan-judul .hanzi-text { font-size: 1.3rem; }
+    .urutan-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .urutan-grid svg { display: block; }
 
     .sub-judul { font-weight: 700; font-size: .9rem; color: #1e293b; margin: 34px 0 12px; }
     .stat-mini { display: flex; gap: 12px; text-align: center; margin-bottom: 12px; }
@@ -129,6 +158,22 @@
     .stat-mini .nama { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; margin-top: 2px; }
     .riwayat-item { padding: 10px 0; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .riwayat-item:last-child { border-bottom: none; }
+
+    /* ---------- mode ulang (shadowing) ---------- */
+    .aksi-hanzi .btn-aksi.berulang, .aksi-hanzi .btn-aksi.berulang:hover,
+    .btn-dengar-kecil.berulang, .btn-dengar-kecil.berulang:hover { background: #dc2626; border-color: #dc2626; color: #fff; }
+    .kotak-huruf.berulang { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.15); }
+
+    .bar-ulang { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 24px; background: #fef2f2; border-top: 1px solid #fecaca; }
+    .bar-ulang[hidden] { display: none; }
+    .bar-ulang-info { font-size: .9rem; color: #7f1d1d; display: flex; align-items: center; min-width: 0; }
+    .bar-ulang-info #labelUlang { max-width: 40vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0 4px; }
+    .titik-ulang { width: 10px; height: 10px; border-radius: 50%; background: #dc2626; flex-shrink: 0; margin-right: 8px; animation: denyut 1s infinite; }
+    @keyframes denyut { 50% { opacity: .25; } }
+    .bar-ulang-aksi { display: flex; align-items: center; gap: 10px; font-size: .85rem; color: #7f1d1d; }
+    .bar-ulang-aksi select { border: 1px solid #fecaca; border-radius: 8px; padding: 6px 10px; font-size: .85rem; background: #fff; color: #334155; }
+    .btn-stop { background: #dc2626; color: #fff; border: none; border-radius: 10px; padding: 9px 22px; font-weight: 700; font-size: .9rem; }
+    .btn-stop:hover { background: #b91c1c; }
 
     @media (max-width: 576px) {
         #modalKata .modal-body { padding: 28px 20px 20px; }
@@ -177,13 +222,21 @@
                 <form method="GET" id="formCari" class="row g-3 align-items-center">
                     <input type="hidden" name="status" value="{{ $status }}">
 
-                    <div class="col-lg-5">
+                    <div class="col-lg-3">
                         <div class="kolom-cari">
                             <i class="fas fa-search"></i>
                             <input type="text" name="search" class="form-control" placeholder="Ketik hanzi / pinyin / arti..." value="{{ $cari }}" autocomplete="off">
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6">
+                        <select name="grup" class="form-select">
+                            <option value="">Semua Grup / Buku</option>
+                            @foreach ($grups as $g)
+                                <option value="{{ $g->id }}" @selected($grup === $g->id)>{{ $g->nama }} ({{ $g->kosakatas_count }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-6">
                         <select name="kategori" class="form-select">
                             <option value="">Semua Kategori</option>
                             @foreach ($kategoris as $kt)
@@ -210,7 +263,7 @@
                 <div class="info-tampil">
                     Menampilkan <strong>{{ $kosakatas->count() }}</strong> dari <strong>{{ $totalCocok }}</strong> kata
                     @if ($totalCocok > $kosakatas->count())
-                        <span class="ms-1">· ketik di pencarian untuk menemukan kata lainnya</span>
+                        <span class="ms-1">· persempit dengan pencarian, grup, kategori, atau level untuk melihat kata lainnya</span>
                     @endif
                 </div>
 
@@ -255,6 +308,23 @@
             <div class="modal-content">
                 <button type="button" class="tutup" data-bs-dismiss="modal" aria-label="Tutup"><i class="fas fa-times"></i></button>
                 <div class="modal-body" id="isiModalKata"></div>
+                {{-- Bar pengulangan (shadowing): muncul selama suara / animasi diulang terus --}}
+                <div class="bar-ulang" id="barUlang" hidden>
+                    <div class="bar-ulang-info">
+                        <span class="titik-ulang"></span>Mengulang: <strong id="labelUlang"></strong><span id="hitungUlang"></span>
+                    </div>
+                    <div class="bar-ulang-aksi">
+                        <label class="mb-0 d-flex align-items-center gap-2">Jeda
+                            <select id="jedaUlang" aria-label="Jeda antar pengulangan">
+                                <option value="1000">1 detik</option>
+                                <option value="2000" selected>2 detik</option>
+                                <option value="3000">3 detik</option>
+                                <option value="5000">5 detik</option>
+                            </select>
+                        </label>
+                        <button type="button" class="btn-stop" id="btnStopUlang"><i class="fas fa-stop me-2"></i>Stop</button>
+                    </div>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="nav-kata" id="btnSebelumnya" aria-label="Kata sebelumnya"><i class="fas fa-chevron-left"></i></button>
                     <a href="#" class="link-detail" id="linkDetail" target="_blank" rel="noopener"><i class="fas fa-external-link-alt me-2"></i>Buka halaman detail</a>
@@ -277,6 +347,7 @@
             const inputStatus  = form.querySelector('[name=status]');
             const selKategori  = form.querySelector('[name=kategori]');
             const selLevel     = form.querySelector('[name=level]');
+            const selGrup      = form.querySelector('[name=grup]');
             const pils         = document.querySelectorAll('#pilStatus .pil');
             let timer = null, controller = null;
 
@@ -330,6 +401,7 @@
             inputCari.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(cari, 350); });
             selKategori.addEventListener('change', cari);
             selLevel.addEventListener('change', cari);
+            selGrup.addEventListener('change', cari);
             form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(timer); cari(); });
 
             pils.forEach(p => p.addEventListener('click', () => {
@@ -339,23 +411,118 @@
             }));
 
             document.getElementById('btnReset').addEventListener('click', () => {
-                inputCari.value = ''; selKategori.value = ''; selLevel.value = ''; inputStatus.value = '';
+                inputCari.value = ''; selGrup.value = ''; selKategori.value = ''; selLevel.value = ''; inputStatus.value = '';
                 sinkronPil();
                 clearTimeout(timer);
                 cari();
             });
 
-            /* ============ suara (text-to-speech browser) ============ */
-            function bicara(teks, kecepatan = 0.9) {
-                if (!('speechSynthesis' in window)) { alert('Browser ini tidak mendukung suara.'); return; }
-                speechSynthesis.cancel();
+            /* ============ suara (text-to-speech) & mode ulang untuk shadowing ============ */
+            const barUlang     = document.getElementById('barUlang');
+            const labelUlang   = document.getElementById('labelUlang');
+            const hitungUlang  = document.getElementById('hitungUlang');
+            const selJeda      = document.getElementById('jedaUlang');
+            const btnStopUlang = document.getElementById('btnStopUlang');
+
+            let ulang       = null;  // pengulangan yang sedang jalan: { tipe, tombol, kotak, htmlAsal, hitung }
+            let sesiUlang   = 0;     // naik tiap pengulangan dimulai / dihentikan; callback lama (sesi basi) diabaikan
+            let timerUlang  = null;
+            let ucapanAktif = null;  // simpan referensi supaya utterance tidak di-garbage-collect sebelum onend terpanggil
+
+            try {
+                const j = localStorage.getItem('hafalan_jeda_ulang');
+                if (j && [...selJeda.options].some(o => o.value === j)) selJeda.value = j;
+            } catch (_) {}
+            selJeda.addEventListener('change', () => { try { localStorage.setItem('hafalan_jeda_ulang', selJeda.value); } catch (_) {} });
+            btnStopUlang.addEventListener('click', () => hentikanUlang());
+
+            const jeda = () => Number(selJeda.value) || 2000;
+
+            function ucap(teks, kecepatan, sesi, selesai) {
                 const u = new SpeechSynthesisUtterance(teks);
                 u.lang = 'zh-TW';
                 u.rate = kecepatan;
                 const suara = speechSynthesis.getVoices();
                 const v = suara.find(s => /zh[-_]TW/i.test(s.lang)) || suara.find(s => /^zh/i.test(s.lang));
                 if (v) u.voice = v;
+
+                // "Selesai bicara" tidak selalu dikabari browser (onend sering tidak terpanggil, terutama
+                // di voice online/Google). Jadi selain onend, dipantau juga lewat speechSynthesis.speaking.
+                let usai = false, pernahBicara = false;
+                const mulai = Date.now();
+                const tutup = () => {
+                    if (usai) return;
+                    usai = true;
+                    clearInterval(pantau);
+                    if (sesi === sesiUlang) selesai();
+                };
+                const pantau = setInterval(() => {
+                    if (sesi !== sesiUlang) { clearInterval(pantau); return; }
+                    if (speechSynthesis.speaking) pernahBicara = true;
+                    else if (pernahBicara || Date.now() - mulai > 1500) tutup();
+                }, 100);
+
+                u.onend   = tutup;
+                u.onerror = (e) => {
+                    if (sesi !== sesiUlang) return;
+                    if (ulang && e.error && e.error !== 'interrupted' && e.error !== 'canceled') ulang.galat = e.error;
+                    tutup(); // error tidak menghentikan pengulangan; Stop tetap di tangan kamu
+                };
+                ucapanAktif = u;
+                speechSynthesis.resume?.();
                 speechSynthesis.speak(u);
+            }
+
+            // Mulai satu pengulangan baru (yang lama otomatis dihentikan). Mengembalikan nomor sesinya.
+            function mulaiUlang(tipe, { tombol = null, kotak = null, label = '' }) {
+                hentikanUlang();
+                ulang = { tipe, tombol, kotak, htmlAsal: tombol ? tombol.innerHTML : null, hitung: 0, galat: null };
+                if (tombol) {
+                    tombol.classList.add('berulang');
+                    tombol.innerHTML = '<i class="fas fa-stop me-2"></i>Stop';
+                }
+                kotak?.classList.add('berulang');
+                labelUlang.textContent = label;
+                hitungUlang.textContent = '';
+                barUlang.hidden = false;
+                return sesiUlang;
+            }
+
+            function hitungPutaran() {
+                if (!ulang) return;
+                ulang.hitung++;
+                hitungUlang.textContent = ' · putaran ke-' + ulang.hitung + (ulang.galat ? ' · ⚠ suara error: ' + ulang.galat : '');
+            }
+
+            function hentikanUlang() {
+                sesiUlang++;
+                clearTimeout(timerUlang);
+                window.speechSynthesis?.cancel();
+                barUlang.hidden = true;
+                if (!ulang) return;
+
+                const { tipe, tombol, kotak, htmlAsal } = ulang;
+                ulang = null;
+                if (tombol) {
+                    tombol.classList.remove('berulang');
+                    if (htmlAsal !== null) tombol.innerHTML = htmlAsal;
+                }
+                kotak?.classList.remove('berulang');
+                if (tipe === 'animasi') hentikanSemua();
+            }
+
+            // Klik tombol suara: mulai mengulang. Klik tombol yang sama lagi: berhenti.
+            function togelSuara(tombol, teks, kecepatan, label) {
+                if (ulang?.tombol === tombol) { hentikanUlang(); return; }
+                if (!('speechSynthesis' in window)) { alert('Browser ini tidak mendukung suara.'); return; }
+
+                const sesi = mulaiUlang('suara', { tombol, label: label + ': ' + teks });
+                const putar = () => {
+                    if (sesi !== sesiUlang) return;
+                    hitungPutaran();
+                    ucap(teks, kecepatan, sesi, () => { timerUlang = setTimeout(putar, jeda()); });
+                };
+                timerUlang = setTimeout(putar, 80); // jeda singkat setelah cancel() supaya browser tidak menelan ucapan pertama
             }
 
             /* ============ popup detail ============ */
@@ -367,6 +534,9 @@
             const linkDetail = document.getElementById('linkDetail');
 
             let daftarKartu = [], idx = -1, tokenMuat = 0, data = null, penulis = [], sesiAnimasi = 0;
+            // true selama latihan menulis berjalan; saat itu klik di kotak huruf TIDAK boleh memutar animasi
+            // (selesai menggambar satu goresan, browser mengirim "click" ke kotak, dan itu membatalkan latihan)
+            let sedangLatihan = false;
             const cache = new Map();
 
             function bukaKartu(kartu) {
@@ -396,8 +566,8 @@
                 if (e.key === 'ArrowRight') btnNext.click();
             });
             modalEl.addEventListener('hidden.bs.modal', () => {
+                hentikanUlang();
                 sesiAnimasi++;
-                speechSynthesis?.cancel();
                 penulis = [];
                 isi.innerHTML = '';
             });
@@ -414,8 +584,8 @@
             async function tampil() {
                 const kartu = daftarKartu[idx];
                 const token = ++tokenMuat;
+                hentikanUlang();
                 sesiAnimasi++;
-                speechSynthesis?.cancel();
 
                 btnPrev.disabled = idx <= 0;
                 btnNext.disabled = idx >= daftarKartu.length - 1;
@@ -497,9 +667,11 @@
                         <button type="button" class="btn-aksi" data-aksi="pelan"><i class="fas fa-volume-down me-2"></i>Pelan</button>
                         <button type="button" class="btn-aksi" data-aksi="animasi"><i class="fas fa-play me-2"></i>Animasi goresan</button>
                         <button type="button" class="btn-aksi" data-aksi="latihan"><i class="fas fa-pen me-2"></i>Latihan menulis</button>
+                        <button type="button" class="btn-aksi" data-aksi="urutan"><i class="fas fa-list-ol me-2"></i>Nomor &amp; arah goresan</button>
                     </div>
                     <div class="area-penulis" id="areaPenulis"></div>
-                    <div class="petunjuk-kotak">Klik kotak huruf untuk memutar animasi satu karakter.</div>
+                    <div class="petunjuk-kotak">Klik kotak huruf untuk mengulang animasi satu karakter terus-menerus (klik lagi untuk berhenti). <span class="ms-2"><span class="petunjuk-radikal"></span>Goresan biru = radikal.</span></div>
+                    <div class="area-urutan" id="areaUrutan" hidden></div>
 
                     <div class="sub-judul">Riwayat review</div>
                     <div class="stat-mini">
@@ -510,7 +682,7 @@
                     ${jadwal ? `<div class="mb-2" style="font-size:.88rem;"><span class="text-muted">Review berikutnya:</span> <strong>${jadwal}</strong></div>` : ''}
                     <div>${riwayat}</div>`;
 
-                siapkanPenulis(d.hanzi);
+                siapkanPenulis(d.hanzi, d.karakters);
             }
 
             /* ============ aksi di dalam popup (delegasi klik) ============ */
@@ -519,11 +691,12 @@
                 if (!el || !data) return;
 
                 switch (el.dataset.aksi) {
-                    case 'dengar':        bicara(data.hanzi, 0.9); break;
-                    case 'pelan':         bicara(data.hanzi, 0.5); break;
-                    case 'dengar-contoh': bicara(data.contoh[Number(el.dataset.i)].hanzi, 0.9); break;
-                    case 'animasi':       animasiSemua(); break;
+                    case 'dengar':        togelSuara(el, data.hanzi, 0.9, 'Dengar'); break;
+                    case 'pelan':         togelSuara(el, data.hanzi, 0.5, 'Pelan'); break;
+                    case 'dengar-contoh': togelSuara(el, data.contoh[Number(el.dataset.i)].hanzi, 0.9, 'Contoh ' + (Number(el.dataset.i) + 1)); break;
+                    case 'animasi':       togelAnimasi(el); break;
                     case 'latihan':       latihanSemua(); break;
+                    case 'urutan':        toggleUrutan(el); break;
                     case 'pindah':        pindahStatus(el.dataset.kunci, el); break;
                 }
             });
@@ -579,10 +752,166 @@
                 }
             }
 
+            /* ============ urutan goresan: nomor & arah panah ============ */
+            const cacheGoresan = new Map();
+
+            async function dataGoresan(c) {
+                if (cacheGoresan.has(c)) return cacheGoresan.get(c);
+                const d = await HanziWriter.loadCharacterData(c);
+                if (!d || !d.strokes || !d.medians) throw new Error();
+                cacheGoresan.set(c, d);
+                return d;
+            }
+
+            // Satu kotak: goresan ke-n (0-based) disorot, goresan sebelumnya gelap,
+            // sisanya samar. Panah mengikuti garis tengah goresan, nomor ada di titik awal.
+            function svgGoresan(d, n) {
+                const jepit = (v) => Math.min(Math.max(v, 62), 962);
+                // koordinat data: sumbu y menghadap atas, digambar dengan y' = 900 - y
+                const titik = d.medians[n].map(([x, y]) => [x, 900 - y]);
+                const awal = titik[0], akhir = titik[titik.length - 1];
+
+                const arah = (dari, ke) => {
+                    const dx = ke[0] - dari[0], dy = ke[1] - dari[1], p = Math.hypot(dx, dy) || 1;
+                    return [dx / p, dy / p];
+                };
+                // titik acuan yang cukup jauh supaya arah tidak ikut goyang oleh titik yang rapat
+                let belakang = awal;
+                for (let i = titik.length - 2; i >= 0; i--) {
+                    if (Math.hypot(akhir[0] - titik[i][0], akhir[1] - titik[i][1]) >= 70) { belakang = titik[i]; break; }
+                }
+                let depan = akhir;
+                for (let i = 1; i < titik.length; i++) {
+                    if (Math.hypot(titik[i][0] - awal[0], titik[i][1] - awal[1]) >= 70) { depan = titik[i]; break; }
+                }
+                const [ax, ay] = arah(belakang, akhir);
+                const [sx, sy] = arah(awal, depan);
+
+                const kepala = [
+                    [akhir[0], akhir[1]],
+                    [akhir[0] - ax * 78 - ay * 40, akhir[1] - ay * 78 + ax * 40],
+                    [akhir[0] - ax * 78 + ay * 40, akhir[1] - ay * 78 - ax * 40],
+                ].map(p => p.join(',')).join(' ');
+
+                const bx = jepit(awal[0] - sx * 78), by = jepit(awal[1] - sy * 78);
+                const nomor = n + 1;
+
+                const jalur = d.strokes.map((p, i) => {
+                    const warna = i < n ? '#475569' : (i === n ? '#fca5a5' : '#eef2f7');
+                    return `<path d="${p}" fill="${warna}"/>`;
+                }).join('');
+
+                return `<svg viewBox="0 0 1024 1024" width="110" height="110" role="img" aria-label="Goresan ke-${nomor}">
+                    <rect x="6" y="6" width="1012" height="1012" rx="60" fill="#fff" stroke="#e2e8f0" stroke-width="10"/>
+                    <path d="M512 6V1018M6 512H1018" stroke="#e2e8f0" stroke-width="6" stroke-dasharray="26 22"/>
+                    <g transform="scale(1,-1) translate(0,-900)">${jalur}</g>
+                    <polyline points="${titik.map(p => p.join(',')).join(' ')}" fill="none" stroke="#dc2626" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polygon points="${kepala}" fill="#dc2626" stroke="#dc2626" stroke-width="10" stroke-linejoin="round"/>
+                    <circle cx="${bx}" cy="${by}" r="60" fill="#dc2626"/>
+                    <text x="${bx}" y="${by}" text-anchor="middle" dominant-baseline="central" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="${nomor > 9 ? 62 : 76}" fill="#fff">${nomor}</text>
+                </svg>`;
+            }
+
+            async function toggleUrutan(tombol) {
+                const area = document.getElementById('areaUrutan');
+                if (!area || !data) return;
+
+                // klik kedua = sembunyikan
+                if (!area.hidden) { area.hidden = true; tombol.classList.remove('utama'); return; }
+                area.hidden = false;
+                tombol.classList.add('utama');
+                if (area.dataset.siap) return;
+
+                const token = tokenMuat;
+                const huruf = [...data.hanzi].filter(c => /\p{Script=Han}/u.test(c));
+                if (!huruf.length) { area.innerHTML = ''; return; }
+                if (typeof HanziWriter === 'undefined') {
+                    area.innerHTML = '<div class="text-muted" style="font-size:.85rem;">Library goresan belum termuat (perlu koneksi internet).</div>';
+                    return;
+                }
+
+                area.innerHTML = '<div class="text-muted" style="font-size:.85rem;"><i class="fas fa-spinner fa-spin me-2"></i>Memuat data goresan...</div>';
+                const hasil = await Promise.allSettled(huruf.map(dataGoresan));
+                if (token !== tokenMuat) return; // popup sudah pindah ke kata lain
+
+                area.innerHTML = huruf.map((c, i) => {
+                    const h = hasil[i];
+                    if (h.status !== 'fulfilled') {
+                        return `<div class="urutan-huruf"><div class="urutan-judul"><span class="hanzi-text">${esc(c)}</span></div>
+                                <div class="text-muted" style="font-size:.82rem;">Data goresan untuk ${esc(c)} tidak tersedia.</div></div>`;
+                    }
+                    const d = h.value;
+                    const kotak = d.strokes.map((_, n) => svgGoresan(d, n)).join('');
+                    const info = cariInfoHuruf(data.karakters, c, i);
+                    return `<div class="urutan-huruf">
+                                <div class="urutan-judul"><span class="hanzi-text">${esc(c)}</span>${info?.pinyin ? ' · ' + esc(info.pinyin) : ''} · ${d.strokes.length} goresan</div>
+                                <div class="urutan-grid">${kotak}</div>
+                            </div>`;
+                }).join('');
+                area.dataset.siap = '1';
+            }
+
             /* ============ animasi goresan & latihan menulis ============ */
-            function siapkanPenulis(hanzi) {
+            // Cari rincian karakter ($daftar = d.karakters dari server) untuk huruf ke-$i.
+            // Cocokkan per posisi dulu (kata dengan huruf kembar, mis. 媽媽), lalu per hanzi.
+            function cariInfoHuruf(daftar, c, i) {
+                if (!daftar || !daftar.length) return null;
+                if (daftar[i] && daftar[i].hanzi === c) return daftar[i];
+                return daftar.find(k => k.hanzi === c) || null;
+            }
+
+            // Panel di samping kotak animasi: hanzi apa, bacaan, arti, radikal, komponen.
+            function htmlInfoHuruf(c, i, total, k) {
+                let h = `<div class="no">Karakter ${i + 1} dari ${total}</div>
+                    <div class="baris-judul">
+                        <span class="h hanzi-text">${esc(c)}</span>
+                        ${k?.pinyin ? `<span class="p">${esc(k.pinyin)}</span>` : ''}
+                        ${k?.goresan ? `<span class="text-muted" style="font-size:.76rem;">${esc(k.goresan)} goresan</span>` : ''}
+                    </div>`;
+
+                if (!k) {
+                    return h + '<div class="text-muted mt-2" style="font-size:.8rem;">Rincian karakter ini belum ada di data pecahan kata.</div>';
+                }
+
+                if (k.arti) h += `<div class="arti-huruf">${esc(k.arti)}</div>`;
+
+                const r = k.radikal;
+                if (r && r.hanzi) {
+                    const varian = (r.varian || []).filter(Boolean).map(esc).join(' ');
+                    const meta = [
+                        r.nomor_kangxi ? 'Kangxi no. ' + esc(r.nomor_kangxi) : '',
+                        r.goresan ? esc(r.goresan) + ' goresan' : '',
+                        varian ? 'varian ' + varian : '',
+                    ].filter(Boolean).join(' · ');
+                    h += `<div class="sub">
+                        <div class="lbl2">Radikal</div>
+                        <div class="blok-rad">
+                            <div class="rad-hanzi">${esc(r.hanzi)}</div>
+                            <div>
+                                <div><span class="p">${esc(r.pinyin)}</span> · <span class="rad-arti">${esc(r.arti)}</span></div>
+                                ${meta ? `<div class="rad-meta">${meta}</div>` : ''}
+                            </div>
+                        </div>
+                        ${r.keterangan ? `<div class="ket-rad">${esc(r.keterangan)}</div>` : ''}
+                    </div>`;
+                } else {
+                    h += `<div class="sub"><div class="lbl2">Radikal</div><span class="text-muted" style="font-size:.8rem;">Belum diisi.</span></div>`;
+                }
+
+                if (k.komponen && k.komponen.length) {
+                    h += `<div class="sub"><div class="lbl2">Komponen</div>${k.komponen.map(x =>
+                        `<span class="chip-komp"><span class="hanzi-text">${esc(x.hanzi)}</span>${x.peran ? `<small>${esc(x.peran)}</small>` : ''}</span>`
+                    ).join('')}</div>`;
+                }
+
+                if (k.penjelasan) h += `<div class="penjelasan">${esc(k.penjelasan)}</div>`;
+                return h;
+            }
+
+            function siapkanPenulis(hanzi, karakters = []) {
                 const area = document.getElementById('areaPenulis');
                 penulis = [];
+                sedangLatihan = false;
                 if (!area) return;
 
                 const huruf = [...hanzi].filter(c => /\p{Script=Han}/u.test(c));
@@ -594,10 +923,21 @@
                 }
 
                 const ukuran = huruf.length === 1 ? 200 : 120;
-                huruf.forEach(c => {
+                huruf.forEach((c, i) => {
+                    // satu item = kotak animasi + panel rincian karakter itu
+                    const item = document.createElement('div');
+                    item.className = 'item-huruf' + (huruf.length === 1 ? ' tunggal' : '');
+
                     const kotak = document.createElement('div');
                     kotak.className = 'kotak-huruf';
-                    area.appendChild(kotak);
+                    item.appendChild(kotak);
+
+                    const panel = document.createElement('div');
+                    panel.className = 'info-huruf';
+                    panel.innerHTML = htmlInfoHuruf(c, i, huruf.length, cariInfoHuruf(karakters, c, i));
+                    item.appendChild(panel);
+
+                    area.appendChild(item);
 
                     const w = HanziWriter.create(kotak, c, {
                         width: ukuran, height: ukuran, padding: 12,
@@ -618,16 +958,16 @@
                     });
                     penulis.push({ w, kotak });
                     kotak.addEventListener('click', () => {
-                        sesiAnimasi++;
-                        w.cancelQuiz?.();
-                        w.showCharacter();
-                        w.animateCharacter();
+                        if (sedangLatihan) return;
+                        if (ulang?.kotak === kotak) { hentikanUlang(); return; } // klik lagi = stop
+                        ulangAnimasi([{ w, kotak }], { kotak, label: 'Animasi ' + c });
                     });
                 });
             }
 
             function hentikanSemua() {
                 sesiAnimasi++;
+                sedangLatihan = false;
                 penulis.forEach(({ w, kotak }) => {
                     if (kotak.dataset.error) return;
                     w.cancelQuiz?.();
@@ -635,19 +975,36 @@
                 });
             }
 
-            async function animasiSemua() {
-                hentikanSemua();
-                const sesi = sesiAnimasi;
-                for (const { w, kotak } of penulis) {
-                    if (sesi !== sesiAnimasi) return;
-                    if (kotak.dataset.error) continue;
-                    await new Promise(res => w.animateCharacter({ onComplete: res }));
+            // Putar animasi goresan berulang-ulang (semua karakter berurutan, lalu jeda, lalu ulang) sampai di-Stop.
+            async function ulangAnimasi(daftar, opsi) {
+                const dipakai = daftar.filter(p => !p.kotak.dataset.error);
+                if (!dipakai.length) return;
+
+                const sesi = mulaiUlang('animasi', opsi);
+                while (sesi === sesiUlang) {
+                    hitungPutaran();
+                    for (const { w } of dipakai) {
+                        if (sesi !== sesiUlang) return;
+                        await new Promise(res => {
+                            const p = w.animateCharacter({ onComplete: res });
+                            if (p && typeof p.then === 'function') p.then(res, res); // cadangan kalau onComplete tidak terpanggil
+                        });
+                    }
+                    if (sesi !== sesiUlang) return;
+                    await new Promise(res => { timerUlang = setTimeout(res, jeda()); });
                 }
             }
 
+            function togelAnimasi(tombol) {
+                if (ulang?.tombol === tombol) { hentikanUlang(); return; }
+                ulangAnimasi(penulis, { tombol, label: 'Animasi goresan ' + data.hanzi });
+            }
+
             async function latihanSemua() {
+                if (ulang?.tipe === 'animasi') hentikanUlang();
                 hentikanSemua();
                 const sesi = sesiAnimasi;
+                sedangLatihan = true;
                 for (const { w, kotak } of penulis) {
                     if (sesi !== sesiAnimasi) return;
                     if (kotak.dataset.error) continue;
@@ -655,6 +1012,7 @@
                     if (sesi !== sesiAnimasi) return;
                     w.showCharacter();
                 }
+                if (sesi === sesiAnimasi) sedangLatihan = false;
             }
         });
     </script>

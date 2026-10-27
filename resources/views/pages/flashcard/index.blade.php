@@ -1,6 +1,6 @@
 @extends('layouts.user.user')
 
-@section('title', 'Flashcard Kosakata')
+@section('title', 'Latihan Kosakata')
 
 @section('styles')
 <style>
@@ -31,9 +31,17 @@
 
     .form-label { font-size: .78rem; font-weight: 600; color: #64748b; margin-bottom: 4px; }
     .form-select { border-radius: 10px; font-size: .85rem; border-color: #e2e8f0; }
+    .jenis-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .jenis-wrap .form-check { margin: 0; padding: 0; }
+    .jenis-wrap .form-check-input { position: absolute; opacity: 0; pointer-events: none; }
+    .jenis-wrap .form-check-label { display: inline-block; font-size: .8rem; font-weight: 600; color: #64748b; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 6px 12px; cursor: pointer; transition: all .15s; }
+    .jenis-wrap .form-check-input:checked + .form-check-label { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; }
+    .jenis-wrap .form-check-input:focus-visible + .form-check-label { outline: 2px solid #1a73e8; outline-offset: 2px; }
     .btn-primary { background: linear-gradient(135deg, #1a73e8, #1558b0); border: none; border-radius: 10px; font-weight: 600; font-size: .85rem; padding: 9px 20px; box-shadow: 0 2px 8px rgba(26,115,232,.35); }
     .btn-primary:hover { background: linear-gradient(135deg, #1558b0, #0f3e82); }
     .btn-orange { background: linear-gradient(135deg, #f97316, #ea580c); border: none; color: #fff; border-radius: 10px; font-weight: 600; font-size: .85rem; padding: 9px 20px; box-shadow: 0 2px 8px rgba(234,88,12,.35); }
+    .empty-grup { border: none; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); text-align: center; padding: 36px 24px; }
+    .empty-grup .ikon { width: 64px; height: 64px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 1.5rem; }
     .btn-orange:hover { color: #fff; background: linear-gradient(135deg, #ea580c, #c2410c); }
 </style>
 @endsection
@@ -45,7 +53,7 @@
             <div class="ph-left">
                 <div class="ph-icon"><i class="fas fa-layer-group"></i></div>
                 <div>
-                    <h5 class="ph-title">Flashcard Kosakata</h5>
+                    <h5 class="ph-title">Latihan Kosakata</h5>
                     <ol class="ph-breadcrumb" aria-label="breadcrumb">
                         <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                         <li><a href="{{ route('admin.hafalan.index') }}">Progres Hafalan</a></li>
@@ -73,6 +81,23 @@
                 </div>
             @endif
 
+            @if ($grups->isEmpty())
+                {{-- Belum punya grup kosakata: flashcard hanya memakai kata dari grup --}}
+                <div class="card empty-grup">
+                    <div class="ikon"><i class="fas fa-folder-open"></i></div>
+                    <h5 class="fw-bold mb-1" style="color:#1e293b;">Belum ada grup kosakata</h5>
+                    <p class="text-muted mb-3" style="font-size:.85rem;">
+                        Flashcard hanya memakai kata yang ada di grup kosakata buatanmu.
+                        Buat grup dulu, lalu masukkan kata-kata yang mau dihafal.
+                    </p>
+                    <div>
+                        <a href="{{ route('admin.grup-kosakata.index') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Kelola grup kosakata
+                        </a>
+                    </div>
+                </div>
+            @else
+
             {{-- Review harian --}}
             <div class="card review-hero mb-4 {{ $jatuhTempo === 0 ? 'kosong' : '' }}">
                 <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
@@ -90,7 +115,7 @@
                                 @if ($jatuhTempo > $batasReview)
                                     Satu sesi memuat maksimal {{ $batasReview }} kata, sisanya bisa dilanjutkan setelahnya.
                                 @elseif ($jatuhTempo > 0)
-                                    Kata berstatus Lupa &amp; Ingat dan Ingat Sepenuhnya yang jadwalnya sudah tiba.
+                                    Kata di grup kosakatamu berstatus Lupa &amp; Ingat dan Ingat Sepenuhnya yang jadwalnya sudah tiba.
                                 @else
                                     Kata baru akan muncul lagi sesuai jadwal. Mau lanjut, pakai latihan bebas di bawah.
                                 @endif
@@ -117,6 +142,17 @@
                         <input type="hidden" name="mode" value="bebas">
 
                         <div class="row g-3">
+                            <div class="col-md-12 col-lg-6">
+                                <label class="form-label" for="f-grup">Grup kosakata</label>
+                                <select class="form-select" id="f-grup" name="grup_kosakata_id">
+                                    <option value="">Semua grup kosakataku</option>
+                                    @foreach ($grups as $grup)
+                                        <option value="{{ $grup->id }}" {{ (string) request('grup_kosakata_id') === (string) $grup->id ? 'selected' : '' }}>
+                                            {{ $grup->nama }} ({{ $grup->kosakatas_count }} kata)
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-6 col-lg-3">
                                 <label class="form-label" for="f-status">Status kata</label>
                                 <select class="form-select" id="f-status" name="status">
@@ -127,6 +163,14 @@
                                 </select>
                             </div>
                             <div class="col-md-6 col-lg-3">
+                                <label class="form-label" for="f-jumlah">Jumlah kartu</label>
+                                <select class="form-select" id="f-jumlah" name="jumlah">
+                                    @foreach ($pilihanJumlah as $n)
+                                        <option value="{{ $n }}" {{ $n === 20 ? 'selected' : '' }}>{{ $n }} kata</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label" for="f-kategori">Kategori</label>
                                 <select class="form-select" id="f-kategori" name="kategori_id">
                                     <option value="">Semua kategori</option>
@@ -135,7 +179,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-6 col-lg-3">
+                            <div class="col-md-6">
                                 <label class="form-label" for="f-level">Level TOCFL</label>
                                 <select class="form-select" id="f-level" name="level_tocfl_id">
                                     <option value="">Semua level</option>
@@ -144,13 +188,17 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-6 col-lg-3">
-                                <label class="form-label" for="f-jumlah">Jumlah kartu</label>
-                                <select class="form-select" id="f-jumlah" name="jumlah">
-                                    @foreach ($pilihanJumlah as $n)
-                                        <option value="{{ $n }}" {{ $n === 20 ? 'selected' : '' }}>{{ $n }} kata</option>
-                                    @endforeach
-                                </select>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="form-label">Jenis soal</div>
+                            <div class="jenis-wrap">
+                                @foreach ($jenisSoal as $kunci => $label)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="jenis[]" value="{{ $kunci }}" id="j-{{ $kunci }}" checked>
+                                        <label class="form-check-label" for="j-{{ $kunci }}">{{ $label }}</label>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
 
@@ -158,7 +206,7 @@
                             <div class="form-check">
                                 <input type="hidden" name="acak" value="0">
                                 <input class="form-check-input" type="checkbox" name="acak" value="1" id="f-acak" checked>
-                                <label class="form-check-label" for="f-acak" style="font-size:.85rem;">Acak urutan kartu</label>
+                                <label class="form-check-label" for="f-acak" style="font-size:.85rem;">Acak urutan soal</label>
                             </div>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-play me-1"></i> Mulai latihan
@@ -168,11 +216,15 @@
 
                     <div class="mt-4 pt-3" style="border-top:1px solid #f1f5f9; font-size:.78rem; color:#64748b; line-height:1.6;">
                         <i class="fas fa-info-circle me-1"></i>
-                        Tombol <b>Ingat</b> memindahkan kata ke <b>Ingat Sepenuhnya</b> (review lagi 7 hari kemudian).
-                        Tombol <b>Lupa</b> memindahkannya ke <b>Lupa &amp; Ingat</b> (review lagi besok).
+                        Hanya kata yang sudah masuk grup kosakata yang muncul di flashcard.
+                        Jawab tiap soal dari ingatanmu, lalu nilai sendiri: <b>Benar</b> atau <b>Salah</b>.
+                        Benar <b>{{ $targetBeruntun }} kali berturut-turut</b> membuat kata menjadi <b>Ingat Sepenuhnya</b> (review tiap 7 hari).
+                        Sekali <b>Salah</b>, kata kembali ke <b>Lupa &amp; Ingat</b> (review besok) dan hitungan mulai lagi dari 0.
                     </div>
                 </div>
             </div>
+
+            @endif
 
         </div>
     </div>

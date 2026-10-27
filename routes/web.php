@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FlashcardController;
+use App\Http\Controllers\Admin\GrupKosakataController;
 use App\Http\Controllers\Admin\HafalanController;
 use App\Http\Controllers\Admin\HafalanRadikalController;
 use App\Http\Controllers\Admin\KerjakanSoalController;
@@ -118,5 +119,17 @@ Route::middleware('auth')->group(function () {
             Route::get('percobaan/{hasilUjian}/hasil', [KerjakanSoalController::class, 'hasil'])->name('hasil');
             Route::post('percobaan/{hasilUjian}/soal/{soal}/lapor', [KerjakanSoalController::class, 'lapor'])->name('lapor');
         });
+
+             Route::controller(GrupKosakataController::class)->prefix('grup-kosakata/{grupKosakata}')->name('grup-kosakata.')->group(function () {
+            Route::get('cari', 'cari')->name('cari');
+            Route::post('kosakata', 'tambahKosakata')->name('kosakata.tambah');
+            Route::post('kosakata/massal', 'tambahMassal')->name('kosakata.massal');
+            Route::patch('kosakata', 'pindahPelajaran')->name('kosakata.pindah');
+            Route::delete('kosakata', 'lepasKosakata')->name('kosakata.lepas');
+        });
+
+        Route::resource('grup-kosakata', GrupKosakataController::class)
+            ->parameters(['grup-kosakata' => 'grupKosakata']);
     });
+
 });

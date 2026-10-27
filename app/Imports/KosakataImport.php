@@ -24,7 +24,9 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
  *
  *   Kosakata          -> tabel kosakatas
  *   Contoh Kalimat    -> tabel contoh_kalimats
- *   Pecahan Karakter  -> tabel kosakata_karakter   (karakternya harus sudah ada di tabel karakters)
+ *   Karakter          -> tabel karakters           (diproses SEBELUM Pecahan Karakter)
+ *   Pecahan Karakter  -> tabel kosakata_karakter   (karakternya harus sudah ada di tabel karakters
+ *                                                   atau ditambahkan lewat sheet Karakter)
  *   Relasi            -> tabel kosakata_relasis
  *   Grup Kosakata     -> tabel grup_kosakatas + grup_kosakata_kosakata
  *
@@ -42,6 +44,7 @@ class KosakataImport implements Import, WithMultipleSheets, SkipsUnknownSheets
     private const SHEET = [
         'Kosakata'         => 'kosakata',
         'Contoh Kalimat'   => 'contoh',
+        'Karakter'         => 'karakter',
         'Pecahan Karakter' => 'pecahan',
         'Relasi'           => 'relasi',
         'Grup Kosakata'    => 'grup',
@@ -66,6 +69,9 @@ class KosakataImport implements Import, WithMultipleSheets, SkipsUnknownSheets
         'contoh_baru'         => 0,
         'contoh_diperbarui'   => 0,
         'contoh_dilewati'     => 0,
+        'karakter_baru'       => 0,
+        'karakter_diperbarui' => 0,
+        'karakter_dilewati'   => 0,
         'pecahan_baru'        => 0,
         'pecahan_diperbarui'  => 0,
         'pecahan_dilewati'    => 0,
@@ -137,6 +143,9 @@ class KosakataImport implements Import, WithMultipleSheets, SkipsUnknownSheets
 
     public function selesai(): void
     {
+        // File besar (ribuan baris pecahan) bisa lebih lama dari batas waktu PHP bawaan.
+        @set_time_limit(0);
+
         $this->kategori = Kategori::pluck('id', 'nama')
             ->mapWithKeys(fn ($id, $nama) => [mb_strtolower($nama) => $id])
             ->all();
@@ -148,6 +157,7 @@ class KosakataImport implements Import, WithMultipleSheets, SkipsUnknownSheets
 
         $this->prosesKosakata();
         $this->prosesContoh();
+        $this->prosesKarakter(); // harus sebelum pecahan: pecahan mencari karakter di tabel karakters
         $this->prosesPecahan();
         $this->prosesRelasi();
         $this->prosesGrup();
@@ -375,6 +385,69 @@ class KosakataImport implements Import, WithMultipleSheets, SkipsUnknownSheets
         $this->ringkasan['contoh_baru']++;
     }
 
+    /* ---------- Sheet Karakter ---------- */
+
+    private function prosesKarakter(): void
+    {
+        $this->olah(
+            'karakter',
+            'Karakter',
+            ['hanzi', 'pinyin', 'baca_indonesia', 'arti_indonesia', 'english', 'level_tocfl', 'urutan'],
+            [
+                'hanzi'          => ['required', 'string', 'max:8'],
+                'pinyin'         => ['required', 'string', 'max:255'],
+                'baca_indonesia' => ['nullable', 'string'],
+                'arti_indonesia' => ['required', 'string'],
+                'english'        => ['nullable', 'string'],
+                'level_tocfl'    => ['nullable', 'integer'],
+                'urutan'         => ['nullable', 'integer', 'min:0'],
+            ],
+            function (array $d): ?string {
+                if ($d['level_tocfl'] !== null && ! isset($this->level[(int) $d['level_tocfl']])) {
+                    return "level_tocfl {$d['level_tocfl']} tidak ada di sistem";
+                }
+
+                $this->simpanKarakter($d);
+
+                return null;
+            },
+        );
+    }
+
+    private function simpanKarakter(array $d): void
+    {
+        $kunci = $d['hanzi'] . '|' . $d['pinyin'];
+
+        $isi = array_filter([
+            'baca_indonesia' => $d['baca_indonesia'],
+            'arti_indonesia' => $d['arti_indonesia'],
+            'english'        => $d['english'],
+            'level_tocfl_id' => $d['level_tocfl'] !== null ? $this->level[(int) $d['level_tocfl']] : null,
+            'urutan'         => $d['urutan'] !== null ? (int) $d['urutan'] : null,
+        ], fn ($nilai) => $nilai !== null);
+
+        // hanzi dan pinyin dibandingkan persis (kolomnya utf8mb4_bin).
+        $ada = Karakter::where('hanzi', $d['hanzi'])->where('pinyin', $d['pinyin'])->first();
+
+        if ($ada) {
+            $this->petaKarakter[$kunci] = $ada->id;
+
+            if (! $this->perbarui) {
+                $this->ringkasan['karakter_dilewati']++;
+                return;
+            }
+
+            // Sel kosong di Excel tidak menghapus data lama.
+            $ada->update($isi);
+            $this->ringkasan['karakter_diperbarui']++;
+            return;
+        }
+
+        $baru = Karakter::create($isi + ['hanzi' => $d['hanzi'], 'pinyin' => $d['pinyin']]);
+        $this->petaKarakter[$kunci] = $baru->id;
+        $this->ringkasan['karakter_baru']++;
+    }
+
     /* ---------- Sheet Pecahan Karakter ---------- */
 
     private function prosesPecahan(): void
@@ -407,7 +480,7 @@ class KosakataImport implements Import, WithMultipleSheets, SkipsUnknownSheets
                 $karakterId = $this->cariKarakter($d['karakter_hanzi'], $d['karakter_pinyin']);
 
                 if (! $karakterId) {
-                    return "karakter {$d['karakter_hanzi']} ({$d['karakter_pinyin']}) belum ada di data karakter; tambahkan karakternya dulu (hanzi dan pinyin harus sama persis)";
+                    return "karakter {$d['karakter_hanzi']} ({$d['karakter_pinyin']}) belum ada di data karakter; tambahkan di sheet Karakter atau di data karakter (hanzi dan pinyin harus sama persis)";
                 }
 
                 $this->simpanPecahan($kosakataId, $karakterId, $d);

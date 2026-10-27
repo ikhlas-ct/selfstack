@@ -54,6 +54,14 @@
                 </a>
             </li>
 
+            <!-- Grup Kosakata / buku pelajaran (aktif juga di halaman create, edit, dan show) -->
+            <li class="nav-item {{ request()->routeIs('admin.grup-kosakata*') ? 'active' : '' }}">
+                <a href="{{ route('admin.grup-kosakata.index') }}">
+                    <i class="fas fa-book"></i>
+                    <p>Grup Kosakata</p>
+                </a>
+            </li>
+
             <!-- Radikal (aktif juga di halaman create, edit, show, dan import) -->
             <li class="nav-item {{ request()->routeIs('admin.radikal*') ? 'active' : '' }}">
                 <a href="{{ route('admin.radikal.index') }}">

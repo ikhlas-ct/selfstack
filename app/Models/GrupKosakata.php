@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Grup kosakata buatan sendiri; bahan generator soal (grup kosakata -> paket soal).
+ * Grup kosakata buatan sendiri, mis. satu buku pelajaran.
+ * Tiap anggota punya nomor pelajaran (pivot.pelajaran, boleh kosong).
+ * Bahan generator soal (grup kosakata -> paket soal).
  */
 class GrupKosakata extends Model
 {
@@ -15,10 +17,14 @@ class GrupKosakata extends Model
 
     protected $guarded = ['id'];
 
-    /** Anggota grup lewat tabel pivot grup_kosakata_kosakata (tanpa timestamps). */
+    /**
+     * Anggota grup lewat tabel pivot grup_kosakata_kosakata (tanpa timestamps).
+     * $kosakata->pivot->pelajaran = nomor pelajaran di buku ini (null = belum ditentukan).
+     */
     public function kosakatas(): BelongsToMany
     {
-        return $this->belongsToMany(Kosakata::class, 'grup_kosakata_kosakata', 'grup_kosakata_id', 'kosakata_id');
+        return $this->belongsToMany(Kosakata::class, 'grup_kosakata_kosakata', 'grup_kosakata_id', 'kosakata_id')
+            ->withPivot('pelajaran');
     }
 
     public function grupSoals(): HasMany

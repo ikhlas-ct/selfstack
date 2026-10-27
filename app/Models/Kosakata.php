@@ -145,6 +145,22 @@ class Kosakata extends Model
     }
 
     /**
+     * Batasi ke anggota satu grup kosakata (mis. satu buku pelajaran).
+     * $grupId kosong = tidak difilter.
+     */
+    public function scopeDalamGrup(Builder $query, ?int $grupId): Builder
+    {
+        if (! $grupId) {
+            return $query;
+        }
+
+        return $query->whereHas(
+            'grupKosakatas',
+            fn (Builder $g) => $g->where('grup_kosakatas.id', $grupId)
+        );
+    }
+
+    /**
      * Urutan tampil: Level 1 -> 6 (berdasarkan kolom `tingkat`, BUKAN id level),
      * kata tanpa level di paling akhir, lalu kolom urutan, lalu id.
      */
