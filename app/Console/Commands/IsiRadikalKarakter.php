@@ -42,6 +42,21 @@ class IsiRadikalKarakter extends Command
         '⺊' => '卜', '⺌' => '小', '⺀' => '冫', '母' => '毋', '虎' => '虍',
     ];
 
+    /**
+     * Koreksi per karakter (radikal Kangxi-nya) untuk karakter yang di sumber data
+     * radikalnya bukan radikal Kangxi (巳, 民, 炏, 丷 ...) atau tidak ada di kamus.
+     * Selalu diutamakan di atas data sumber.
+     */
+    private const KOREKSI_KARAKTER = [
+        '巳' => '己', '巴' => '己', '巷' => '己', '巽' => '己',
+        '民' => '氏', '氓' => '氏',
+        '營' => '火', '煢' => '火',
+        '兼' => '八',
+        '刁' => '刀', '孑' => '子',
+        '汙' => '水', '湮' => '水',
+        '艷' => '色', '嬾' => '女', '馌' => '食',
+    ];
+
     public function handle(): int
     {
         $kolomHanzi = Schema::hasColumn('karakters', 'hanzi') ? 'hanzi' : 'karakter';
@@ -96,7 +111,10 @@ class IsiRadikalKarakter extends Command
 
         foreach ($karakters as $k) {
             $hanzi = $k->getAttribute($kolomHanzi);
-            $id    = $petaKarakter[$hanzi] ?? null;
+            $koreksi = self::KOREKSI_KARAKTER[$hanzi] ?? null;
+            $id    = ($koreksi !== null && isset($peta[$koreksi]))
+                ? (int) $peta[$koreksi]
+                : ($petaKarakter[$hanzi] ?? null);
 
             if ($id === null) {
                 $tanpaData[] = $hanzi;
@@ -135,7 +153,7 @@ class IsiRadikalKarakter extends Command
         if ($tanpaData) {
             $this->warn('Tidak ada data radikal di sumber untuk ' . count($tanpaData) . ' karakter: '
                 . implode(' ', array_slice($tanpaData, 0, 30)) . (count($tanpaData) > 30 ? ' ...' : ''));
-            $this->line('Isi manual lewat kolom radikal_id di tabel karakters.');
+            $this->line('Isi manual lewat kolom radikal_id di tabel karakters (atau tambahkan ke KOREKSI_KARAKTER). Baris non-hanzi seperti "OK" boleh dibiarkan kosong.');
         }
         if ($radikalTakCocok) {
             $this->line('Radikal sumber yang tidak ada padanannya di tabel radikals: '
